@@ -1,5 +1,6 @@
 package MicroModel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class CircleSimulation {
@@ -10,6 +11,9 @@ public class CircleSimulation {
     double roadRadius;
 
     int iterationNumber = 0;
+
+    // Set up writefile
+    WriteFile data = new WriteFile("scripts/dataCircle.dat");
 
     public CircleSimulation (double initialRoadLength, int fleetSize) {
 
@@ -60,7 +64,7 @@ public class CircleSimulation {
             double arcAngle = arcLength / roadRadius;
             double xPos = roadRadius * Math.sin(arcAngle);
             double yPos = roadRadius * Math.cos(arcAngle);
-            System.out.println(String.format("%d %d", xPos, yPos));
+            data.writeToFile(String.format(Double.toString(xPos) + " " + Double.toString(yPos)));
         }
     }
 
@@ -73,7 +77,7 @@ public class CircleSimulation {
             vehicle.step(dt);
         }
         plotOutput();
-        System.out.println("\n \n");
+        data.writeToFile("\n \n");
         iterationNumber += 1;
     }
 
@@ -90,13 +94,16 @@ public class CircleSimulation {
 
     public static void main (String[] args) {
 
+        // Simulation settings
         double initialRoadLength = 260;
         int fleetSize = 10;
         double dt = 0.1;
         double simDuration = 10;
 
+        // Setup a new simulation
         CircleSimulation sim = new CircleSimulation(initialRoadLength, fleetSize);
 
+        // Run simulation
         sim.run(dt, simDuration);
     }
 

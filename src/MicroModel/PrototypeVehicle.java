@@ -294,8 +294,8 @@ public class PrototypeVehicle {
         /* Step the vehicle by one timestep
          */
         // Update velocity
-        velocity = Math.max(acceleration * dt, 0);
-        position = velocity * dt;
+        velocity += Math.max(acceleration * dt, 0);
+        position += velocity * dt;
         acceleration = updateAcceleration();
         // Switch params at t+1 to t
         report = newReport;
