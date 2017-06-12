@@ -24,9 +24,19 @@ public class PrototypeVehicle {
     public HashMap<String, String> paramDescription;
     public HashMap<String, String> paramUnits;
 
+    // Current report of vehicle driving condition
+    public HashMap<String, String> report;
+    public HashMap<String, String> newReport;
+
     // Vehicle properties
     public double vehicleLength = 5.0;  //m
     public double vehicleWidth = 2.0; //m
+
+    // Driving characteristics
+    private double maxDeceleration = -9.81; // Max deceleration at 1G
+    private double idealVelocity = 35; // ms^-1 velocity the driver 'wants' to travel at
+    private double maxVelocity = 80 * 1000 / (60 * 60); // max vehicle velocity is 80 kmh^-1
+    private double randomNumber = Math.random(); // a random number to inject variation in driving style
 
 
     public void initialiseParams () {
@@ -42,7 +52,7 @@ public class PrototypeVehicle {
                 "CC7", "Oscillation acceleration", "ms^-2",
                 "CC8", "Standstill acceleration", "ms^-2",
                 "CC9", "Acceleration at 80 kmh^-1", "ms^-2"
-                ));
+        ));
 
         paramDescription = new HashMap<>();
         paramUnits = new HashMap<>();
@@ -66,9 +76,24 @@ public class PrototypeVehicle {
         status = new HashMap<>();
         statusDescription = new HashMap<>();
 
-        for (int i=0; i<variables.size(); i+=1) {
+        for (int i=0; i<variables.size(); i+=2) {
             status.put(variables.get(i), 0.0);
             statusDescription.put(variables.get(i), variables.get(i+1));
+        }
+
+        List<String> reportHeadings = new ArrayList<>(Arrays.asList(
+                "status",
+                "condition",
+                "ation",
+                "statusCode"
+        ));
+
+        report = new HashMap<>();
+        newReport = new HashMap<>();
+
+        for (int i=0; i<reportHeadings.size(); i++) {
+            report.put(reportHeadings.get(i), "");
+            newReport.put(reportHeadings.get(i), "");
         }
 
     }
@@ -108,7 +133,7 @@ public class PrototypeVehicle {
             if (dv >= 0 | vehicleAhead.acceleration < -1) {
                 vSlow = velocity;
             } else {
-                vSlow = vehicleAhead.velocity + dv * (rand - 0.5);
+                vSlow = vehicleAhead.velocity + dv * (randomNumber - 0.5);
             }
             status.put("sdxc", params.get("CC0") + params.get("CC1") * vSlow);
         }
@@ -130,14 +155,53 @@ public class PrototypeVehicle {
         }
 
         double newAcceleration;
-        String newStatus;
-        String newCondition;
-        String newAction;
-        String newStatusCode;
 
-
-
-
-
+        // Analyse the computed statuses and determine the next course of action for the vehicle
+        if ((dv < status.get("sdvo")) && (dx <= status.get("sdxc"))) {
+            // Vehicle too close to one ahead; decelerate and increase distance
+            if (velocity > 0) {
+                if (dv < 0) {
+                    if (dx > params.get("CC0")) {
+                        newAcceleration = Math.min(vehicleAhead.acceleration + dv * dx / (params.get("CC0") - dx), acceleration);
+                    } else {
+                        newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (dv - status.get("sdvo")), acceleration);
+                    }
+                }
+                if (acceleration > -params.get("CC7")) {
+                    newAcceleration = -params.get("CC7");
+                } else {
+                    newAcceleration = Math.max(acceleration, -10 + 0.5 * Math.sqrt(velocity));
+                }
+            }
+        } else if (dv < status.get("sdvc") && (dx < status.get("sdxv"))) {
+            // Vehicle is drawing in on a slowing vehicle ahead - e.g. at lights, decelerate and reduce distance
+            newAcceleration = Math.max(0.5 * dv * dv / (status.get("sdxc") - dv - 0.1), maxDeceleration);
+        } else if (dv < status.get("sdvo") && (dx < status.get("sdxo"))) {
+            // Vehicle is doing great! Maintain distance and jus' keep on truckin'!
+            if (acceleration <= 0) {
+                newAcceleration = Math.min(acceleration, -params.get("CC7"));
+            } else {
+                newAcceleration = Math.min(Math.max(acceleration, params.get("CC7")), idealVelocity - velocity);
+            }
+        } else {
+            // Vehicle ahead is not constraining current vehicle - accelerate or maintain speed
+            if (dx > status.get("sdxc")) {
+                double maxAcceleration;
+                if (report.get("statusCode") == "c") {
+                    newAcceleration = params.get("CC7");
+                } else {
+                    maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
+                    if (dx < status.get("sdxo")) {
+                        newAcceleration = Math.min(dv * dv / (status.get("sdxo") - dx), maxAcceleration);
+                    } else {
+                        newAcceleration = maxAcceleration;
+                    }
+                }
+                newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
+                if (Math.abs(idealVelocity - velocity) < 0.1) {
+                    // At top speed
+                }
+            }
+        }
     }
 }
