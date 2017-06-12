@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+// TODO need to update the car in front at each timestep...
+
 public class PrototypeVehicle {
 
     // Proximate vehicles
@@ -29,14 +31,25 @@ public class PrototypeVehicle {
     public HashMap<String, String> newReport;
 
     // Vehicle properties
-    public double vehicleLength = 5.0;  //m
-    public double vehicleWidth = 2.0; //m
+    public double vehicleLength = 5.0;                  // m
+    public double vehicleWidth = 2.0;                   // m
 
     // Driving characteristics
-    private double maxDeceleration = -9.81; // Max deceleration at 1G
-    private double idealVelocity = 35; // ms^-1 velocity the driver 'wants' to travel at
-    private double maxVelocity = 80 * 1000 / (60 * 60); // max vehicle velocity is 80 kmh^-1
-    private double randomNumber = Math.random(); // a random number to inject variation in driving style
+    private double maxDeceleration = -9.81;             // ms^-2 Max deceleration at 1G
+    private double idealVelocity = 35;                  // ms^-1 Velocity the driver 'wants' to travel at
+    private double maxVelocity = 80 * 1000 / (60 * 60); // ms^-1 Max vehicle velocity is 80 kmh^-1
+    private double randomNumber = Math.random();        // a random number to inject variation in driving style
+
+
+    public PrototypeVehicle (double position, double velocity) {
+
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = 0;
+
+        // Initialise the parameters with the default Weidemann params.
+        setDefaultParams();
+    }
 
 
     public void initialiseParams () {
@@ -184,8 +197,6 @@ public class PrototypeVehicle {
             newAcceleration = driveFreely(newAcceleration);
         }
 
-        // Switch params at t+1 to t
-        report = newReport;
         return newAcceleration;
     }
 
@@ -286,5 +297,7 @@ public class PrototypeVehicle {
         velocity = Math.max(acceleration * dt, 0);
         position = velocity * dt;
         acceleration = updateAcceleration();
+        // Switch params at t+1 to t
+        report = newReport;
     }
 }

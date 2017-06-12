@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="367bc15f-1328-4d7e-8fcd-7c23263a1393" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MicroModel/Vehicle.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java" afterPath="$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -17,21 +18,21 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="Vehicle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/MicroModel/Vehicle.java">
+      <file leaf-file-name="CircleSimulation.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/MicroModel/CircleSimulation.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1545">
-              <caret line="103" column="0" lean-forward="false" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+            <state relative-caret-position="870">
+              <caret line="76" column="28" lean-forward="false" selection-start-line="76" selection-start-column="28" selection-end-line="76" selection-end-column="28" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PrototypeVehicle.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="PrototypeVehicle.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1185">
-              <caret line="287" column="43" lean-forward="false" selection-start-line="287" selection-start-column="43" selection-end-line="287" selection-end-column="43" />
+            <state relative-caret-position="105">
+              <caret line="7" column="58" lean-forward="false" selection-start-line="7" selection-start-column="58" selection-end-line="7" selection-end-column="58" />
               <folding />
             </state>
           </provider>
@@ -52,9 +53,7 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="300">
               <caret line="20" column="72" lean-forward="false" selection-start-line="20" selection-start-column="72" selection-end-line="20" selection-end-column="72" />
-              <folding>
-                <marker date="1497002361000" expanded="true" signature="250:432" ph="{...}" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -71,6 +70,8 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>dv</find>
+      <find>setOr</find>
+      <find>dt</find>
     </findStrings>
     <replaceStrings>
       <replace>status.get(&quot;dv&quot;)</replace>
@@ -92,6 +93,8 @@
         <option value="$PROJECT_DIR$/src/MicroModel/RandomDrawer.java" />
         <option value="$PROJECT_DIR$/src/MicroModel/Vehicle.java" />
         <option value="$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java" />
+        <option value="$PROJECT_DIR$/src/MicroModel/NewSim.java" />
+        <option value="$PROJECT_DIR$/src/MicroModel/CircleSimulation.java" />
       </list>
     </option>
   </component>
@@ -657,12 +660,12 @@
       <updated>1496928350952</updated>
       <workItem from="1496928354367" duration="132000" />
       <workItem from="1496997622168" duration="738000" />
-      <workItem from="1496999603279" duration="21499000" />
+      <workItem from="1496999603279" duration="26730000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22369000" />
+    <option name="totallyTimeSpent" value="27600000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-3069" y="-135" width="1684" height="1418" extended-state="0" />
@@ -889,13 +892,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/MicroModel/Vehicle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1545">
+          <caret line="103" column="0" lean-forward="false" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/MicroModel/SpatialVector.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
           <caret line="20" column="72" lean-forward="false" selection-start-line="20" selection-start-column="72" selection-end-line="20" selection-end-column="72" />
-          <folding>
-            <marker date="1497002361000" expanded="true" signature="250:432" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -907,18 +916,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/MicroModel/Vehicle.java">
+    <entry file="file://$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1545">
-          <caret line="103" column="0" lean-forward="false" selection-start-line="103" selection-start-column="0" selection-end-line="103" selection-end-column="0" />
+        <state relative-caret-position="105">
+          <caret line="7" column="58" lean-forward="false" selection-start-line="7" selection-start-column="58" selection-end-line="7" selection-end-column="58" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java">
+    <entry file="file://$PROJECT_DIR$/src/MicroModel/CircleSimulation.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1185">
-          <caret line="287" column="43" lean-forward="false" selection-start-line="287" selection-start-column="43" selection-end-line="287" selection-end-column="43" />
+        <state relative-caret-position="870">
+          <caret line="76" column="28" lean-forward="false" selection-start-line="76" selection-start-column="28" selection-end-line="76" selection-end-column="28" />
           <folding />
         </state>
       </provider>
