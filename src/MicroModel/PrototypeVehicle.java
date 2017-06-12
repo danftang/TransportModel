@@ -122,34 +122,42 @@ public class PrototypeVehicle {
         params.put("CC5", 2.1);
     }
 
-    public void updateAcceleration () {
+    public double updateAcceleration () {
 
         status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
         status.put("dv", vehicleAhead.velocity - velocity);
 
         if (vehicleAhead.velocity <= 0) {
+            // Vehicle ahead is stopped so following distance = stopping distance
             status.put("sdxc", params.get("CC0"));
         } else {
             double vSlow;
             if (status.get("dv") >= 0 | vehicleAhead.acceleration < -1) {
+                // Vehicle ahead is going slower than this one
                 vSlow = velocity;
             } else {
+                // Vehicle ahead is going faster than this one
                 vSlow = vehicleAhead.velocity + status.get("dv") * (randomNumber - 0.5);
             }
+            // Following distance is stopping distance + following time * velocity from above
             status.put("sdxc", params.get("CC0") + params.get("CC1") * vSlow);
         }
 
+        // Compute remaining status variables
         status.put("sdxo", status.get("sdxc") + params.get("CC2"));
         status.put("sdxv", status.get("sdxo") + params.get("CC3") * (status.get("dv") - params.get("CC4")));
         status.put("sdv", params.get("CC6") * status.get("dv") * status.get("dx"));
 
         if (vehicleAhead.velocity > 0) {
+            // If the vehicle ahead is moving
             status.put("sdvc", params.get("CC4") - status.get("sdv"));
         } else {
+            // ...or is stopped...
             status.put("sdvc", 0.0);
         }
 
         if (velocity > params.get("CC5")) {
+            // If velocity is greater than the following threshold
             status.put("sdvo", status.get("sdv") + params.get("CC5"));
         } else {
             status.put("sdvo", status.get("sdv"));
@@ -177,8 +185,8 @@ public class PrototypeVehicle {
         }
 
         // Switch params at t+1 to t
-        acceleration = newAcceleration;
         report = newReport;
+        return newAcceleration;
     }
 
 
@@ -246,7 +254,7 @@ public class PrototypeVehicle {
         /* Vehicle ahead is not constraining current vehicle - accelerate or maintain speed
          */
         // Set the status
-        newReport.put("condition", "no constraint");
+        newReport.put("condition", "under no constraint");
         newReport.put("action", "drive free");
 
         // Compute the new acceleration
@@ -265,8 +273,18 @@ public class PrototypeVehicle {
             newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
             if (Math.abs(idealVelocity - velocity) < 0.1) {
                 // At top speed
+                newReport.put("condition", "at top speed");
             }
         }
         return newAcceleration;
+    }
+
+    public void step (double dt) {
+        /* Step the vehicle by one timestep
+         */
+        // Update velocity
+        velocity = Math.max(acceleration * dt, 0);
+        position = velocity * dt;
+        acceleration = updateAcceleration();
     }
 }
