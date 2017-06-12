@@ -65,12 +65,14 @@ public class PrototypeVehicle {
         }
 
         List<String> variables = new ArrayList<>(Arrays.asList(
+                "dx", "distance to vehicle ahead",
+                "dv", "velocity difference to vehicle ahead",
                 "sdxc", "minimum safe following distance",
                 "sdxo", "maximum following distance",
                 "sdxv", "",
                 "sdv", "distance at which driver notices gap ahead is closing",
                 "sdvc", "minimum perceptible closing speed difference",
-                "sdvo", "minimum perceptible opening speed difference",
+                "sdvo", "minimum perceptible opening speed difference"
         ));
 
         status = new HashMap<>();
@@ -123,24 +125,24 @@ public class PrototypeVehicle {
 
     public void updateAcceleration () {
 
-        double dx = vehicleAhead.position - position - vehicleAhead.vehicleLength;
-        double dv = vehicleAhead.velocity - velocity;
+        status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
+        status.put("dv", vehicleAhead.velocity - velocity);
 
         if (vehicleAhead.velocity <= 0) {
             status.put("sdxc", params.get("CC0"));
         } else {
             double vSlow;
-            if (dv >= 0 | vehicleAhead.acceleration < -1) {
+            if (status.get("dv") >= 0 | vehicleAhead.acceleration < -1) {
                 vSlow = velocity;
             } else {
-                vSlow = vehicleAhead.velocity + dv * (randomNumber - 0.5);
+                vSlow = vehicleAhead.velocity + status.get("dv") * (randomNumber - 0.5);
             }
             status.put("sdxc", params.get("CC0") + params.get("CC1") * vSlow);
         }
 
         status.put("sdxo", status.get("sdxc") + params.get("CC2"));
-        status.put("sdxv", status.get("sdxo") + params.get("CC3") * (dv - params.get("CC4")));
-        status.put("sdv", params.get("CC6") * dv * dx);
+        status.put("sdxv", status.get("sdxo") + params.get("CC3") * (status.get("dv") - params.get("CC4")));
+        status.put("sdv", params.get("CC6") * status.get("dv") * status.get("dx"));
 
         if (vehicleAhead.velocity > 0) {
             status.put("sdvc", params.get("CC4") - status.get("sdv"));
@@ -154,17 +156,18 @@ public class PrototypeVehicle {
             status.put("sdvo", status.get("sdv"));
         }
 
-        double newAcceleration;
+        double newAcceleration = 0.0;
 
         // Analyse the computed statuses and determine the next course of action for the vehicle
-        if ((dv < status.get("sdvo")) && (dx <= status.get("sdxc"))) {
+        if ((status.get("dv") < status.get("sdvo")) && (status.get("dx") <= status.get("sdxc"))) {
             // Vehicle too close to one ahead; decelerate and increase distance
+            newAcceleration = 0;
             if (velocity > 0) {
-                if (dv < 0) {
-                    if (dx > params.get("CC0")) {
-                        newAcceleration = Math.min(vehicleAhead.acceleration + dv * dx / (params.get("CC0") - dx), acceleration);
+                if (status.get("dv") < 0) {
+                    if (status.get("dx") > params.get("CC0")) {
+                        newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dx") / (params.get("CC0") - status.get("dx")), acceleration);
                     } else {
-                        newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (dv - status.get("sdvo")), acceleration);
+                        newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (status.get("dv") - status.get("sdvo")), acceleration);
                     }
                 }
                 if (acceleration > -params.get("CC7")) {
@@ -173,10 +176,10 @@ public class PrototypeVehicle {
                     newAcceleration = Math.max(acceleration, -10 + 0.5 * Math.sqrt(velocity));
                 }
             }
-        } else if (dv < status.get("sdvc") && (dx < status.get("sdxv"))) {
+        } else if (status.get("dv") < status.get("sdvc") && (status.get("dx") < status.get("sdxv"))) {
             // Vehicle is drawing in on a slowing vehicle ahead - e.g. at lights, decelerate and reduce distance
-            newAcceleration = Math.max(0.5 * dv * dv / (status.get("sdxc") - dv - 0.1), maxDeceleration);
-        } else if (dv < status.get("sdvo") && (dx < status.get("sdxo"))) {
+            newAcceleration = Math.max(0.5 * status.get("dv") * status.get("dv") / (status.get("sdxc") - status.get("dv") - 0.1), maxDeceleration);
+        } else if (status.get("dv") < status.get("sdvo") && (status.get("dx") < status.get("sdxo"))) {
             // Vehicle is doing great! Maintain distance and jus' keep on truckin'!
             if (acceleration <= 0) {
                 newAcceleration = Math.min(acceleration, -params.get("CC7"));
@@ -185,14 +188,14 @@ public class PrototypeVehicle {
             }
         } else {
             // Vehicle ahead is not constraining current vehicle - accelerate or maintain speed
-            if (dx > status.get("sdxc")) {
+            if (status.get("dx") > status.get("sdxc")) {
                 double maxAcceleration;
                 if (report.get("statusCode") == "c") {
                     newAcceleration = params.get("CC7");
                 } else {
                     maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
-                    if (dx < status.get("sdxo")) {
-                        newAcceleration = Math.min(dv * dv / (status.get("sdxo") - dx), maxAcceleration);
+                    if (status.get("dx") < status.get("sdxo")) {
+                        newAcceleration = Math.min(status.get("dv") * status.get("dv") / (status.get("sdxo") - status.get("dx")), maxAcceleration);
                     } else {
                         newAcceleration = maxAcceleration;
                     }
@@ -203,5 +206,6 @@ public class PrototypeVehicle {
                 }
             }
         }
+        acceleration = newAcceleration;
     }
 }

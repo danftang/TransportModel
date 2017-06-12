@@ -30,8 +30,8 @@
       <file leaf-file-name="PrototypeVehicle.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1151">
-              <caret line="205" column="4" lean-forward="false" selection-start-line="205" selection-start-column="4" selection-end-line="205" selection-end-column="4" />
+            <state relative-caret-position="371">
+              <caret line="157" column="0" lean-forward="false" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -67,6 +67,14 @@
         <option value="Class" />
       </list>
     </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>dv</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>status.get(&quot;dv&quot;)</replace>
+    </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -649,12 +657,12 @@
       <updated>1496928350952</updated>
       <workItem from="1496928354367" duration="132000" />
       <workItem from="1496997622168" duration="738000" />
-      <workItem from="1496999603279" duration="18227000" />
+      <workItem from="1496999603279" duration="18896000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="19097000" />
+    <option name="totallyTimeSpent" value="19766000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-2969" y="-135" width="1584" height="1418" extended-state="0" />
@@ -909,8 +917,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1151">
-          <caret line="205" column="4" lean-forward="false" selection-start-line="205" selection-start-column="4" selection-end-line="205" selection-end-column="4" />
+        <state relative-caret-position="371">
+          <caret line="157" column="0" lean-forward="false" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
           <folding />
         </state>
       </provider>
