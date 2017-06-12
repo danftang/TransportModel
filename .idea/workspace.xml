@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="367bc15f-1328-4d7e-8fcd-7c23263a1393" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/MicroModel/Vehicle.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java" afterPath="$PROJECT_DIR$/src/MicroModel/PrototypeVehicle.java" />
-    </list>
+    <list default="true" id="367bc15f-1328-4d7e-8fcd-7c23263a1393" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -21,8 +18,8 @@
       <file leaf-file-name="CircleSimulation.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/MicroModel/CircleSimulation.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="870">
-              <caret line="76" column="28" lean-forward="false" selection-start-line="76" selection-start-column="28" selection-end-line="76" selection-end-column="28" />
+            <state relative-caret-position="641">
+              <caret line="67" column="33" lean-forward="false" selection-start-line="67" selection-start-column="33" selection-end-line="67" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -660,12 +657,12 @@
       <updated>1496928350952</updated>
       <workItem from="1496928354367" duration="132000" />
       <workItem from="1496997622168" duration="738000" />
-      <workItem from="1496999603279" duration="26730000" />
+      <workItem from="1496999603279" duration="26854000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="27600000" />
+    <option name="totallyTimeSpent" value="27724000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-3069" y="-135" width="1684" height="1418" extended-state="0" />
@@ -926,8 +923,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/MicroModel/CircleSimulation.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="76" column="28" lean-forward="false" selection-start-line="76" selection-start-column="28" selection-end-line="76" selection-end-column="28" />
+        <state relative-caret-position="641">
+          <caret line="67" column="33" lean-forward="false" selection-start-line="67" selection-start-column="33" selection-end-line="67" selection-end-column="33" />
           <folding />
         </state>
       </provider>
