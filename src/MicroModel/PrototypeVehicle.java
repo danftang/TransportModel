@@ -86,8 +86,7 @@ public class PrototypeVehicle {
         List<String> reportHeadings = new ArrayList<>(Arrays.asList(
                 "status",
                 "condition",
-                "ation",
-                "statusCode"
+                "action"
         ));
 
         report = new HashMap<>();
@@ -160,52 +159,114 @@ public class PrototypeVehicle {
 
         // Analyse the computed statuses and determine the next course of action for the vehicle
         if ((status.get("dv") < status.get("sdvo")) && (status.get("dx") <= status.get("sdxc"))) {
-            // Vehicle too close to one ahead; decelerate and increase distance
-            newAcceleration = 0;
-            if (velocity > 0) {
-                if (status.get("dv") < 0) {
-                    if (status.get("dx") > params.get("CC0")) {
-                        newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dx") / (params.get("CC0") - status.get("dx")), acceleration);
-                    } else {
-                        newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (status.get("dv") - status.get("sdvo")), acceleration);
-                    }
-                }
-                if (acceleration > -params.get("CC7")) {
-                    newAcceleration = -params.get("CC7");
-                } else {
-                    newAcceleration = Math.max(acceleration, -10 + 0.5 * Math.sqrt(velocity));
-                }
-            }
+            // Vehicle too close to one ahead; decelerate and open gap.
+            newReport.put("status", "A");
+            newAcceleration = decelerateOpen(newAcceleration);
         } else if (status.get("dv") < status.get("sdvc") && (status.get("dx") < status.get("sdxv"))) {
             // Vehicle is drawing in on a slowing vehicle ahead - e.g. at lights, decelerate and reduce distance
-            newAcceleration = Math.max(0.5 * status.get("dv") * status.get("dv") / (status.get("sdxc") - status.get("dv") - 0.1), maxDeceleration);
+            newReport.put("status", "B");
+            newAcceleration = decelerateClose(newAcceleration);
         } else if (status.get("dv") < status.get("sdvo") && (status.get("dx") < status.get("sdxo"))) {
-            // Vehicle is doing great! Maintain distance and jus' keep on truckin'!
-            if (acceleration <= 0) {
-                newAcceleration = Math.min(acceleration, -params.get("CC7"));
-            } else {
-                newAcceleration = Math.min(Math.max(acceleration, params.get("CC7")), idealVelocity - velocity);
-            }
+            // Maintain distance
+            newReport.put("status", "C");
+            newAcceleration = maintainDistance(newAcceleration);
         } else {
-            // Vehicle ahead is not constraining current vehicle - accelerate or maintain speed
-            if (status.get("dx") > status.get("sdxc")) {
-                double maxAcceleration;
-                if (report.get("statusCode") == "c") {
-                    newAcceleration = params.get("CC7");
+            // Drive freely - unconstrained by vehicle ahead
+            newReport.put("status", "D");
+            newAcceleration = driveFreely(newAcceleration);
+        }
+
+        // Switch params at t+1 to t
+        acceleration = newAcceleration;
+        report = newReport;
+    }
+
+
+    public double decelerateOpen (double newAcceleration) {
+        /* Vehicle too close to one ahead; decelerate and increase distance
+         */
+        // Set the status
+        newReport.put("condition", "too close");
+        newReport.put("action", "open gap");
+
+        // Compute the new acceleration
+        newAcceleration = 0;
+        if (velocity > 0) {
+            if (status.get("dv") < 0) {
+                if (status.get("dx") > params.get("CC0")) {
+                    newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dx") /
+                                      (params.get("CC0") - status.get("dx")), acceleration);
                 } else {
-                    maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
-                    if (status.get("dx") < status.get("sdxo")) {
-                        newAcceleration = Math.min(status.get("dv") * status.get("dv") / (status.get("sdxo") - status.get("dx")), maxAcceleration);
-                    } else {
-                        newAcceleration = maxAcceleration;
-                    }
+                    newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (status.get("dv") - status.get("sdvo")),
+                                               acceleration);
                 }
-                newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
-                if (Math.abs(idealVelocity - velocity) < 0.1) {
-                    // At top speed
-                }
+            }
+            if (acceleration > -params.get("CC7")) {
+                newAcceleration = -params.get("CC7");
+            } else {
+                newAcceleration = Math.max(acceleration, -10 + 0.5 * Math.sqrt(velocity));
             }
         }
-        acceleration = newAcceleration;
+        return newAcceleration;
+    }
+
+
+    public double decelerateClose (double newAcceleration) {
+        /* Vehicle is drawing in on a slowing vehicle ahead - e.g. at lights, decelerate and reduce distance
+         */
+        // Set the status
+        newReport.put("condition", "too close");
+        newReport.put("action", "close gap");
+
+        // Compute the new acceleration
+        newAcceleration = Math.max(0.5 * status.get("dv") * status.get("dv") /
+                                   (status.get("sdxc") - status.get("dv") - 0.1), maxDeceleration);
+        return newAcceleration;
+    }
+
+
+    public double maintainDistance (double newAcceleration) {
+        /* Vehicle is doing great! Maintain distance and jus' keep on truckin'!
+         */
+        // Set the status
+        newReport.put("condition", "good distance");
+        newReport.put("action", "maintain gap");
+
+        // Compute the new acceleration
+        if (acceleration <= 0) {
+            newAcceleration = Math.min(acceleration, -params.get("CC7"));
+        } else {
+            newAcceleration = Math.min(Math.max(acceleration, params.get("CC7")), idealVelocity - velocity);
+        }
+        return newAcceleration;
+    }
+
+
+    public double driveFreely (double newAcceleration) {
+        /* Vehicle ahead is not constraining current vehicle - accelerate or maintain speed
+         */
+        // Set the status
+        newReport.put("condition", "no constraint");
+        newReport.put("action", "drive free");
+
+        // Compute the new acceleration
+        if (status.get("dx") > status.get("sdxc")) {
+            double maxAcceleration;
+            if (report.get("status") == "D") {
+                newAcceleration = params.get("CC7");
+            } else {
+                maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
+                if (status.get("dx") < status.get("sdxo")) {
+                    newAcceleration = Math.min(status.get("dv") * status.get("dv") / (status.get("sdxo") - status.get("dx")), maxAcceleration);
+                } else {
+                    newAcceleration = maxAcceleration;
+                }
+            }
+            newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
+            if (Math.abs(idealVelocity - velocity) < 0.1) {
+                // At top speed
+            }
+        }
+        return newAcceleration;
     }
 }
