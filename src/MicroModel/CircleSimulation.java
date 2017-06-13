@@ -126,7 +126,7 @@ public class CircleSimulation {
         double initialRoadLength = 500;
         int fleetSize = 10;
         double dt = 0.1;
-        double simDuration = 70;//0.5;
+        double simDuration = 100;//0.5;
 
         // Setup a new simulation
         CircleSimulation sim = new CircleSimulation(initialRoadLength, fleetSize);
