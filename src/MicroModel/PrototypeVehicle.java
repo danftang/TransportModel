@@ -1,9 +1,6 @@
 package MicroModel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 // TODO need to update the car in front at each timestep...
 
@@ -31,6 +28,7 @@ public class PrototypeVehicle {
     public HashMap<String, String> newReport;
 
     // Vehicle properties
+    public String identification;
     public double vehicleLength = 5.0;                  // m
     public double vehicleWidth = 2.0;                   // m
 
@@ -41,11 +39,25 @@ public class PrototypeVehicle {
     private double randomNumber = Math.random();        // a random number to inject variation in driving style
 
 
+    public PrototypeVehicle (double position, double velocity, String identification) {
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = 0;
+        this.identification = identification;
+
+        // Initialise the parameters with the default Weidemann params.
+        setDefaultParams();
+
+    }
+
     public PrototypeVehicle (double position, double velocity) {
 
         this.position = position;
         this.velocity = velocity;
         this.acceleration = 0;
+
+        // Set a random identification
+        this.identification = UUID.randomUUID().toString().substring(0, 5);
 
         // Initialise the parameters with the default Weidemann params.
         setDefaultParams();
@@ -139,6 +151,8 @@ public class PrototypeVehicle {
 
         status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
         status.put("dv", vehicleAhead.velocity - velocity);
+//        System.out.println(vehicleAhead.velocity +" "+ velocity +" "+ Double.toString(vehicleAhead.velocity - velocity) +" "+ status.get("dv"));
+//        System.out.println(vehicleAhead.position +" "+ position +" "+ vehicleLength +" "+ Double.toString(vehicleAhead.position - position - vehicleAhead.vehicleLength) +" "+ status.get("dx"));
 
         if (vehicleAhead.velocity <= 0) {
             // Vehicle ahead is stopped so following distance = stopping distance
@@ -159,7 +173,7 @@ public class PrototypeVehicle {
         // Compute remaining status variables
         status.put("sdxo", status.get("sdxc") + params.get("CC2"));
         status.put("sdxv", status.get("sdxo") + params.get("CC3") * (status.get("dv") - params.get("CC4")));
-        status.put("sdv", params.get("CC6") * status.get("dv") * status.get("dx"));
+        status.put("sdv", params.get("CC6") * status.get("dx") * status.get("dx"));
 
         if (vehicleAhead.velocity > 0) {
             // If the vehicle ahead is moving
@@ -197,6 +211,10 @@ public class PrototypeVehicle {
             newAcceleration = driveFreely(newAcceleration);
         }
 
+//        System.out.println(identification +" "+ vehicleAhead.identification);
+
+//        System.out.println(acceleration +" "+ newAcceleration);
+        System.out.println(identification +" "+ newReport.get("status") +" "+ vehicleAhead.identification);
         return newAcceleration;
     }
 
@@ -213,19 +231,24 @@ public class PrototypeVehicle {
         if (velocity > 0) {
             if (status.get("dv") < 0) {
                 if (status.get("dx") > params.get("CC0")) {
+//                    System.out.println("a");
                     newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dx") /
                                       (params.get("CC0") - status.get("dx")), acceleration);
                 } else {
+//                    System.out.println("b");
                     newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (status.get("dv") - status.get("sdvo")),
                                                acceleration);
                 }
             }
-            if (acceleration > -params.get("CC7")) {
+            if (newAcceleration > -params.get("CC7")) {
+//                System.out.println("c");
                 newAcceleration = -params.get("CC7");
             } else {
-                newAcceleration = Math.max(acceleration, -10 + 0.5 * Math.sqrt(velocity));
+//                System.out.println("d");
+                newAcceleration = Math.max(newAcceleration, -10 + 0.5 * Math.sqrt(velocity));
             }
         }
+//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
@@ -239,7 +262,8 @@ public class PrototypeVehicle {
 
         // Compute the new acceleration
         newAcceleration = Math.max(0.5 * status.get("dv") * status.get("dv") /
-                                   (status.get("sdxc") - status.get("dv") - 0.1), maxDeceleration);
+                                   (status.get("sdxc") - status.get("dx") - 0.1), maxDeceleration);
+//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
@@ -253,10 +277,14 @@ public class PrototypeVehicle {
 
         // Compute the new acceleration
         if (acceleration <= 0) {
+//            System.out.println("Ca");
             newAcceleration = Math.min(acceleration, -params.get("CC7"));
         } else {
-            newAcceleration = Math.min(Math.max(acceleration, params.get("CC7")), idealVelocity - velocity);
+//            System.out.println("Cb");
+            newAcceleration = Math.max(acceleration, params.get("CC7"));
+            newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
         }
+//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
@@ -287,6 +315,7 @@ public class PrototypeVehicle {
                 newReport.put("condition", "at top speed");
             }
         }
+//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
@@ -294,9 +323,10 @@ public class PrototypeVehicle {
         /* Step the vehicle by one timestep
          */
         // Update velocity
-        velocity += Math.max(acceleration * dt, 0);
-        position += velocity * dt;
         acceleration = updateAcceleration();
+        velocity += acceleration * dt;
+        velocity = Math.max(velocity, 0);
+        position += velocity * dt;
         // Switch params at t+1 to t
         report = newReport;
     }

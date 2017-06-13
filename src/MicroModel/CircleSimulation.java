@@ -1,7 +1,9 @@
 package MicroModel;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class CircleSimulation {
 
@@ -38,15 +40,15 @@ public class CircleSimulation {
 
         for (int i=0; i<n; i++) {
             double position = spacing * i;
-            double velocity = Math.random() * (40 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
-            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity);
+            double velocity = Math.random() * (80 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
+            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
             fleet.add(vehicle);
         }
 
         // Set the vehicle ahead // TODO need to be automatically computed each dt
         for (int i=0; i<n; i++) {
             PrototypeVehicle vehicleAhead;
-            if (i==0) {vehicleAhead = fleet.get(n-1);} else {vehicleAhead = fleet.get(i-1);}
+            if (i==n-1) {vehicleAhead = fleet.get(0);} else {vehicleAhead = fleet.get(i+1);}
             fleet.get(i).vehicleAhead = vehicleAhead;
         }
     }
@@ -72,6 +74,33 @@ public class CircleSimulation {
     public void step (double dt) {
         /* Step forwards by dt
          */
+        // TODO this is nasty ass
+
+        ArrayList<Double> distances = new ArrayList<>();
+        for (PrototypeVehicle vehicle: fleet) {
+            distances.add(vehicle.position);
+        }
+        Collections.sort(distances);
+        ArrayList<PrototypeVehicle> order = new ArrayList<>();
+        for (double distance: distances) {
+            for (PrototypeVehicle vehicle: fleet) {
+                if (vehicle.position == distance) {
+                    order.add(vehicle);
+                }
+            }
+        }
+        System.out.println(order.size());
+//        for (PrototypeVehicle vehicle: order) {
+//            System.out.println(vehicle.identification);
+//        }
+
+        for (int i=0; i<order.size(); i++) {
+            PrototypeVehicle vehicleAhead;
+            if (i==order.size()-1) {vehicleAhead = order.get(0);} else {vehicleAhead = order.get(i+1);
+            }
+            order.get(i).vehicleAhead = vehicleAhead;
+        }
+
 
         for (PrototypeVehicle vehicle: fleet) {
             vehicle.step(dt);
@@ -86,6 +115,10 @@ public class CircleSimulation {
         /* Run the sim
          */
 
+//        for (PrototypeVehicle vehicle : fleet) {
+//            System.out.println(vehicle.identification + " " + vehicle.vehicleAhead.identification);
+//        }
+
         for (int i=0; i*dt<=simDuration; i++) {
             step(dt);
         }
@@ -95,10 +128,10 @@ public class CircleSimulation {
     public static void main (String[] args) {
 
         // Simulation settings
-        double initialRoadLength = 260;
+        double initialRoadLength = 500;
         int fleetSize = 10;
         double dt = 0.1;
-        double simDuration = 10;
+        double simDuration = 50;//0.5;
 
         // Setup a new simulation
         CircleSimulation sim = new CircleSimulation(initialRoadLength, fleetSize);

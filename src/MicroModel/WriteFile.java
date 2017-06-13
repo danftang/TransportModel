@@ -16,7 +16,7 @@ public class WriteFile {
 
 
     public WriteFile (String file_path, boolean append) {
-        path = file_path;
+        this(file_path);
         append_to_file = append;
     }
 
