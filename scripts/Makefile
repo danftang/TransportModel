@@ -1,2 +1,3 @@
 clean:
 	rm *.dat
+	clear

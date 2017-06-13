@@ -1,7 +1,5 @@
 package MicroModel;
 
-import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -91,9 +89,6 @@ public class CircleSimulation {
             }
         }
         System.out.println(order.size());
-//        for (PrototypeVehicle vehicle: order) {
-//            System.out.println(vehicle.identification);
-//        }
 
         for (int i=0; i<order.size(); i++) {
             PrototypeVehicle vehicleAhead;
@@ -115,10 +110,6 @@ public class CircleSimulation {
     public void run (double dt, double simDuration) {
         /* Run the sim
          */
-
-//        for (PrototypeVehicle vehicle : fleet) {
-//            System.out.println(vehicle.identification + " " + vehicle.vehicleAhead.identification);
-//        }
 
         for (int i=0; i*dt<=simDuration; i++) {
             step(dt);

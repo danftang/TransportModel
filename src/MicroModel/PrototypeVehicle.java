@@ -36,7 +36,7 @@ public class PrototypeVehicle {
     private double maxDeceleration = -9.81;             // ms^-2 Max deceleration at 1G
     private double idealVelocity = 35;                  // ms^-1 Velocity the driver 'wants' to travel at
     private double maxVelocity = 80 * 1000 / (60 * 60); // ms^-1 Max vehicle velocity is 80 kmh^-1
-    private double randomNumber = Math.random();        // a random number to inject variation in driving style
+    private double randomNumber = Math.random() / 2;        // a random number to inject variation in driving style
 
     // TODO hack zone
     public double circum;
@@ -158,18 +158,14 @@ public class PrototypeVehicle {
             status.put("dx", status.get("dx") + circum);
         }
 
-
-
         status.put("dv", vehicleAhead.velocity - velocity);
-//        System.out.println(vehicleAhead.velocity +" "+ velocity +" "+ Double.toString(vehicleAhead.velocity - velocity) +" "+ status.get("dv"));
-//        System.out.println(vehicleAhead.position +" "+ position +" "+ vehicleLength +" "+ Double.toString(vehicleAhead.position - position - vehicleAhead.vehicleLength) +" "+ status.get("dx"));
 
         if (vehicleAhead.velocity <= 0) {
             // Vehicle ahead is stopped so following distance = stopping distance
             status.put("sdxc", params.get("CC0"));
         } else {
             double vSlow;
-            if (status.get("dv") >= 0 | vehicleAhead.acceleration < -1) {
+            if (status.get("dv") >= 0 | vehicleAhead.acceleration < 0) {
                 // Vehicle ahead is going slower than this one
                 vSlow = velocity;
             } else {
@@ -221,10 +217,6 @@ public class PrototypeVehicle {
             newAcceleration = driveFreely(newAcceleration);
         }
 
-//        System.out.println(identification +" "+ vehicleAhead.identification);
-
-//        System.out.println(acceleration +" "+ newAcceleration);
-        System.out.println(identification +" "+ newReport.get("status") +" "+ vehicleAhead.identification +" "+ status.get("dx"));
         return newAcceleration;
     }
 
@@ -241,24 +233,22 @@ public class PrototypeVehicle {
         if (velocity > 0) {
             if (status.get("dv") < 0) {
                 if (status.get("dx") > params.get("CC0")) {
-//                    System.out.println("a");
-                    newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dx") /
+                    newAcceleration = Math.min(vehicleAhead.acceleration + status.get("dv") * status.get("dv") /
                                       (params.get("CC0") - status.get("dx")), acceleration);
                 } else {
-//                    System.out.println("b");
                     newAcceleration = Math.min(vehicleAhead.acceleration + 0.5 * (status.get("dv") - status.get("sdvo")),
                                                acceleration);
                 }
             }
             if (newAcceleration > -params.get("CC7")) {
-//                System.out.println("c");
                 newAcceleration = -params.get("CC7");
             } else {
-//                System.out.println("d");
-                newAcceleration = Math.max(newAcceleration, -10 + 0.5 * Math.sqrt(velocity));
+                System.out.println(newAcceleration +" "+ (-10 + 0.5 * Math.sqrt(velocity)));
+                newAcceleration = Math.min(newAcceleration, -10 + 0.5 * Math.sqrt(velocity));
+                System.out.println(newAcceleration);
             }
         }
-//        System.out.println(newAcceleration);
+        System.out.println(acceleration +" "+ newAcceleration);
         return newAcceleration;
     }
 
@@ -273,7 +263,6 @@ public class PrototypeVehicle {
         // Compute the new acceleration
         newAcceleration = Math.max(0.5 * status.get("dv") * status.get("dv") /
                                    (status.get("sdxc") - status.get("dx") - 0.1), maxDeceleration);
-//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
@@ -287,14 +276,11 @@ public class PrototypeVehicle {
 
         // Compute the new acceleration
         if (acceleration <= 0) {
-//            System.out.println("Ca");
             newAcceleration = Math.min(acceleration, -params.get("CC7"));
         } else {
-//            System.out.println("Cb");
             newAcceleration = Math.max(acceleration, params.get("CC7"));
             newAcceleration = Math.min(newAcceleration, idealVelocity - velocity);
         }
-//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 
