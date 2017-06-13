@@ -243,12 +243,9 @@ public class PrototypeVehicle {
             if (newAcceleration > -params.get("CC7")) {
                 newAcceleration = -params.get("CC7");
             } else {
-                System.out.println(newAcceleration +" "+ (-10 + 0.5 * Math.sqrt(velocity)));
                 newAcceleration = Math.min(newAcceleration, -10 + 0.5 * Math.sqrt(velocity));
-                System.out.println(newAcceleration);
             }
         }
-        System.out.println(acceleration +" "+ newAcceleration);
         return newAcceleration;
     }
 
@@ -311,7 +308,6 @@ public class PrototypeVehicle {
                 newReport.put("condition", "at top speed");
             }
         }
-//        System.out.println(newAcceleration);
         return newAcceleration;
     }
 

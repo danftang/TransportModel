@@ -88,7 +88,6 @@ public class CircleSimulation {
                 }
             }
         }
-        System.out.println(order.size());
 
         for (int i=0; i<order.size(); i++) {
             PrototypeVehicle vehicleAhead;
