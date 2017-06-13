@@ -40,8 +40,9 @@ public class CircleSimulation {
 
         for (int i=0; i<n; i++) {
             double position = spacing * i;
-            double velocity = Math.random() * (80 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
+            double velocity = Math.random() * (40 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
             PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
+            vehicle.circum = initialRoadLength;
             fleet.add(vehicle);
         }
 
@@ -131,7 +132,7 @@ public class CircleSimulation {
         double initialRoadLength = 500;
         int fleetSize = 10;
         double dt = 0.1;
-        double simDuration = 50;//0.5;
+        double simDuration = 70;//0.5;
 
         // Setup a new simulation
         CircleSimulation sim = new CircleSimulation(initialRoadLength, fleetSize);

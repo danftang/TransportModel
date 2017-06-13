@@ -38,6 +38,9 @@ public class PrototypeVehicle {
     private double maxVelocity = 80 * 1000 / (60 * 60); // ms^-1 Max vehicle velocity is 80 kmh^-1
     private double randomNumber = Math.random();        // a random number to inject variation in driving style
 
+    // TODO hack zone
+    public double circum;
+
 
     public PrototypeVehicle (double position, double velocity, String identification) {
         this.position = position;
@@ -150,6 +153,13 @@ public class PrototypeVehicle {
     public double updateAcceleration () {
 
         status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
+        if (vehicleAhead.position < position) {
+            // Hateful little hack for circular track...
+            status.put("dx", status.get("dx") + circum);
+        }
+
+
+
         status.put("dv", vehicleAhead.velocity - velocity);
 //        System.out.println(vehicleAhead.velocity +" "+ velocity +" "+ Double.toString(vehicleAhead.velocity - velocity) +" "+ status.get("dv"));
 //        System.out.println(vehicleAhead.position +" "+ position +" "+ vehicleLength +" "+ Double.toString(vehicleAhead.position - position - vehicleAhead.vehicleLength) +" "+ status.get("dx"));
@@ -214,7 +224,7 @@ public class PrototypeVehicle {
 //        System.out.println(identification +" "+ vehicleAhead.identification);
 
 //        System.out.println(acceleration +" "+ newAcceleration);
-        System.out.println(identification +" "+ newReport.get("status") +" "+ vehicleAhead.identification);
+        System.out.println(identification +" "+ newReport.get("status") +" "+ vehicleAhead.identification +" "+ status.get("dx"));
         return newAcceleration;
     }
 
