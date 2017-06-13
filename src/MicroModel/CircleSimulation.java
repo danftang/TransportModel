@@ -58,10 +58,8 @@ public class CircleSimulation {
          */
 
         for (PrototypeVehicle vehicle: fleet) {
-            double noLaps = vehicle.position / initialRoadLength;
-            double noWholeLaps = Math.floor(noLaps);
-            double remainingLap = noLaps - noWholeLaps;
-            double arcLength = remainingLap * initialRoadLength;
+            double lapPosition = vehicle.position / initialRoadLength;
+            double arcLength = lapPosition * initialRoadLength;
             double arcAngle = arcLength / roadRadius;
             double xPos = roadRadius * Math.sin(arcAngle);
             double yPos = roadRadius * Math.cos(arcAngle);
@@ -73,8 +71,14 @@ public class CircleSimulation {
     public void step (double dt) {
         /* Step forwards by dt
          */
-        // TODO this is nasty ass
+        // Move vehicles back to the start once they go around
+        for (PrototypeVehicle vehicle: fleet) {
+            if (vehicle.position > initialRoadLength) {
+                vehicle.position -= initialRoadLength;
+            }
+        }
 
+        // TODO this is slow...
         ArrayList<Double> distances = new ArrayList<>();
         for (PrototypeVehicle vehicle: fleet) {
             distances.add(vehicle.position);

@@ -29,13 +29,13 @@ public class PrototypeVehicle {
 
     // Vehicle properties
     public String identification;
-    public double vehicleLength = 5.0;                  // m
-    public double vehicleWidth = 2.0;                   // m
+    public double vehicleLength = 5.0;                      // m
+    public double vehicleWidth = 2.0;                       // m
 
     // Driving characteristics
-    private double maxDeceleration = -9.81;             // ms^-2 Max deceleration at 1G
-    private double idealVelocity = 35;                  // ms^-1 Velocity the driver 'wants' to travel at
-    private double maxVelocity = 80 * 1000 / (60 * 60); // ms^-1 Max vehicle velocity is 80 kmh^-1
+    private double maxDeceleration = -9.81;                 // ms^-2 Max deceleration at 1G
+    private double idealVelocity = 35;                      // ms^-1 Velocity the driver 'wants' to travel at
+    private double maxVelocity = 80 * 1000 / (60 * 60);     // ms^-1 Max vehicle velocity is 80 kmh^-1
     private double randomNumber = Math.random() / 2;        // a random number to inject variation in driving style
 
     // TODO hack zone
