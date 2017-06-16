@@ -6,55 +6,54 @@ import MicroModel.WriteFile;
 public class CornerGeometry {
 
     // Initial details
-    SpatialVector seg_start;
-    SpatialVector seg_end;
-    SpatialVector corner_location;
-    double corner_rad;
+    SpatialVector segStart;
+    SpatialVector segEnd;
+    SpatialVector cornerLocation;
+    double cornerRad;
 
     // Normalised vectors for the inway / outway
-    SpatialVector vec_in;
-    SpatialVector vec_out;
+    SpatialVector vecIn;
+    SpatialVector vecOut;
 
     // Lengths of the inway. outway, arc and segment
-    double len_in;
-    double len_out;
-    double len_arc;
-    double total_length;
+    double lenIn;
+    double lenOut;
+    double lenArc;
+    double totalLength;
 
     // Arc and angles
-    double corner_angle;
-    double arc_angle;
-    SpatialVector corner_start;
-    SpatialVector corner_end;
-    SpatialVector arc_centre;
+    double cornerAngle;
+    double arcAngle;
+    SpatialVector cornerStart;
+    SpatialVector cornerEnd;
+    SpatialVector arcCentre;
 
 
-    public CornerGeometry (SpatialVector seg_start, SpatialVector seg_end, SpatialVector corner_location,
-                           double corner_rad) {
+    public CornerGeometry (SpatialVector segStart, SpatialVector segEnd, SpatialVector cornerLocation,
+                           double cornerRad) {
 
-        this.seg_start = seg_start;
-        this.seg_end = seg_end;
-        this.corner_location = corner_location;
-        this.corner_rad = corner_rad;
+        this.segStart = segStart;
+        this.segEnd = segEnd;
+        this.cornerLocation = cornerLocation;
+        this.cornerRad = cornerRad;
 
-        this.vec_in = seg_start.sub(corner_location).normalize();
-        System.out.println(vec_in.x +" "+ vec_in.y);
-        this.vec_out = seg_end.sub(corner_location).normalize();
+        this.vecIn = segStart.sub(cornerLocation).normalize();
+        this.vecOut = segEnd.sub(cornerLocation).normalize();
 
-        this.corner_angle = vec_in.angleWith(vec_out);
-        this.arc_angle = Math.PI - corner_angle;
-        this.len_arc = corner_rad * arc_angle;
+        this.cornerAngle = vecIn.angleWith(vecOut);
+        this.arcAngle = Math.PI - cornerAngle;
+        this.lenArc = cornerRad * arcAngle;
 
-        double trim = corner_rad / Math.tan(corner_angle / 2.0);
-        this.len_in = seg_start.sub(corner_location).length() - trim;
-        this.len_out = seg_end.sub(corner_location).length() - trim;
-        this.total_length = len_in + len_arc + len_out;
+        double trim = cornerRad / Math.tan(cornerAngle / 2.0);
+        this.lenIn = segStart.sub(cornerLocation).length() - trim;
+        this.lenOut = segEnd.sub(cornerLocation).length() - trim;
+        this.totalLength = lenIn + lenArc + lenOut;
 
-        this.corner_start = seg_start.sub(vec_in.scale(len_in));
-        this.corner_end = corner_location.add(vec_out.scale(trim));
+        this.cornerStart = segStart.sub(vecIn.scale(lenIn));
+        this.cornerEnd = cornerLocation.add(vecOut.scale(trim));
 
-        SpatialVector vec_in_perp = vec_in.perpendicular();
-        arc_centre = corner_start.add(vec_in_perp.scale(corner_rad));
+        SpatialVector vecInPerp = vecIn.perpendicular();
+        arcCentre = cornerStart.add(vecInPerp.scale(cornerRad));
 
     }
 
@@ -63,24 +62,24 @@ public class CornerGeometry {
         /* Convert distance along a road segment into a point in space
          */
         // Check if still on inway
-        if (distance <= len_in) {
-            SpatialVector test = seg_start.sub(vec_in.scale(distance));
+        if (distance <= lenIn) {
+            SpatialVector test = segStart.sub(vecIn.scale(distance));
             return test;
         }
         // Check if on the arc
-        else if (distance < len_in + len_arc) {
-            double dist_on_arc = distance - len_in;
-            double angle = -dist_on_arc / corner_rad;
-            double x_ = arc_centre.x + Math.cos(angle) * (corner_start.x - arc_centre.x)
-                    - Math.sin(angle) * (corner_start.y - arc_centre.y);
-            double y_ = arc_centre.y + Math.sin(angle) * (corner_start.x - arc_centre.x)
-                    + Math.cos(angle) * (corner_start.y - arc_centre.y);
+        else if (distance < lenIn + lenArc) {
+            double dist_on_arc = distance - lenIn;
+            double angle = -dist_on_arc / cornerRad;
+            double x_ = arcCentre.x + Math.cos(angle) * (cornerStart.x - arcCentre.x)
+                    - Math.sin(angle) * (cornerStart.y - arcCentre.y);
+            double y_ = arcCentre.y + Math.sin(angle) * (cornerStart.x - arcCentre.x)
+                    + Math.cos(angle) * (cornerStart.y - arcCentre.y);
             return new SpatialVector(x_, y_, 0.0);
         }
         // Failing that we're on the outway
         else {
-            double dist_on_seg = distance - len_in - len_arc;
-            return seg_end.sub(vec_out.scale(dist_on_seg));
+            double distOnSeg = distance - lenIn - lenArc;
+            return segEnd.sub(vecOut.scale(distOnSeg));
         }
     }
 
@@ -97,24 +96,24 @@ public class CornerGeometry {
 
         CornerGeometry cg = new CornerGeometry(start, end, corner, radius);
 
-        for (double dist=0; dist <= cg.total_length; dist += cg.total_length/100.) {
+        for (double dist=0; dist <= cg.totalLength; dist += cg.totalLength/100.) {
             SpatialVector point = cg.convertDistanceToPoint(dist);
             data.writeToFile(point.x + " " + point.y);
         }
 
         boolean bugFix = false;
         if (bugFix) {
-            System.out.println("vec_in " + cg.vec_in.x + " " + cg.vec_in.y);
-            System.out.println("vec_out " + cg.vec_out.x + " " + cg.vec_out.y);
-            System.out.println("len_in " + cg.len_in);
-            System.out.println("len_out " + cg.len_out);
-            System.out.println("len_arc " + cg.len_arc);
-            System.out.println("total_length " + cg.total_length);
-            System.out.println("corner_angle " + cg.corner_angle);
-            System.out.println("arc_angle " + cg.arc_angle);
-            System.out.println("corner_start " + cg.corner_start.x + " " + cg.corner_start.y);
-            System.out.println("corner_end " + cg.corner_end.x + " " + cg.corner_end.y);
-            System.out.println("arc_centre " + cg.arc_centre.x + " " + cg.arc_centre.y);
+            System.out.println("vecIn " + cg.vecIn.x + " " + cg.vecIn.y);
+            System.out.println("vecOut " + cg.vecOut.x + " " + cg.vecOut.y);
+            System.out.println("lenIn " + cg.lenIn);
+            System.out.println("lenOut " + cg.lenOut);
+            System.out.println("lenArc " + cg.lenArc);
+            System.out.println("totalLength " + cg.totalLength);
+            System.out.println("cornerAngle " + cg.cornerAngle);
+            System.out.println("arcAngle " + cg.arcAngle);
+            System.out.println("cornerStart " + cg.cornerStart.x + " " + cg.cornerStart.y);
+            System.out.println("cornerEnd " + cg.cornerEnd.x + " " + cg.cornerEnd.y);
+            System.out.println("arcCentre " + cg.arcCentre.x + " " + cg.arcCentre.y);
         }
     }
 }
