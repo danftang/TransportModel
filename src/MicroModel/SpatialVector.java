@@ -2,9 +2,9 @@ package MicroModel;
 
 public class SpatialVector {
 
-    double x;
-    double y;
-    double z;
+    public double x;
+    public double y;
+    public double z;
 
 
     public SpatialVector(double x, double y, double z) {
@@ -60,6 +60,21 @@ public class SpatialVector {
     /* Get the unit vector
      */
         return scale(1.0 / length());
+    }
+
+
+    public double angleWith(SpatialVector otherVector) {
+        /* Compute the angle made between this and the other vector
+         */
+        return 2.0 * Math.atan(this.sub(otherVector).length() / this.add(otherVector).length());
+    }
+
+
+    public SpatialVector perpendicular() {
+        /* Return the vector perpendicular to this
+         */
+        // TODO make 3D!!!
+        return new SpatialVector(-1*y, x, z);
     }
 
 
