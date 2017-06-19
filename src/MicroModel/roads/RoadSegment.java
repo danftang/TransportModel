@@ -21,7 +21,7 @@ public abstract class RoadSegment {
 
     // Connecting segments
     public ArrayList<RoadSegment> connectedSegments = new ArrayList<>();
-    HashMap<String, RoadSegment> connectionKey = new HashMap<>();
+    HashMap<String, Integer> connectionKey = new HashMap<>();
 
     // Vehicles on the segment
     public LinkedList<PrototypeVehicle> traffic = new LinkedList<>();
@@ -29,6 +29,26 @@ public abstract class RoadSegment {
 
     // Methods which extensions to this abstract class must overide:
     public abstract SpatialVector convertPositionToLocation (double position);
+
+
+    public HashMap<String, Object> getFirstVehicle () {
+        /* Returns a hashmap with the first vehicle in the segment ahead and its distance ahead from the end of the
+        segment that originally called it */
+        // TODO will break for the first vehicle on a linear road - i.e. if there is not vehicle ahead even in the distance.
+        HashMap<String, Object> firstVehicle = new HashMap<>();
+
+        if (traffic.size() > 0) {
+            PrototypeVehicle vehicle = traffic.get(0);
+            double distanceAhead = traffic.get(0).position;
+            firstVehicle.put("vehicle", vehicle);
+            firstVehicle.put("distanceAhead", distanceAhead);
+            return firstVehicle;
+        } else {
+            HashMap<String, Object> returningAnswer = connectedSegments.get(1).getFirstVehicle();
+            returningAnswer.put("distanceAhead", (double) returningAnswer.get("distanceAhead") + segLength);
+            return returningAnswer;
+        }
+    }
 
 
     public void initialiseTraffic () {
@@ -61,10 +81,11 @@ public abstract class RoadSegment {
         // segmented discontinuity - whereas dv etc can still be computed on the vehicle.
         for (int i=0; i<traffic.size(); i++) {
             if (i == traffic.size()-1) {
-                traffic.get(i).vehicleAhead = connectedSegments.get(1).traffic.get(0);
+                HashMap<String, Object> vehicleAhead = connectedSegments.get(1).getFirstVehicle();
+                traffic.get(i).vehicleAhead = (PrototypeVehicle) vehicleAhead.get("vehicle");
                 double distToSegEnd = segLength - traffic.get(i).position;
-                traffic.get(i).status.put("dx", distToSegEnd + connectedSegments.get(1).traffic.get(0).position -
-                                                connectedSegments.get(1).traffic.get(0).vehicleLength);
+                traffic.get(i).status.put("dx", distToSegEnd + (double) vehicleAhead.get("distanceAhead") -
+                                                traffic.get(i).vehicleAhead.vehicleLength);
             } else {
                 traffic.get(i).vehicleAhead = traffic.get(i+1);
                 traffic.get(i).status.put("dx", traffic.get(i+1).position - traffic.get(i).position -

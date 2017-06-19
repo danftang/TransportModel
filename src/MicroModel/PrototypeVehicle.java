@@ -152,6 +152,7 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
         params.put("CC9", 1.5);
     }
 
+
     public void setDefaultParams () {
         setOriginalParams();
         params.put("CC0", 1.35);
