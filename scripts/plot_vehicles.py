@@ -2,7 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
-filename = "dataCircle.dat"
+# The indexes for the xpos and ypos
+xpos_index = 1
+ypos_index = 2
+
+filename = "dataSquareCorner.dat"
 f = open(filename, 'r')
 
 data = []
@@ -15,8 +19,9 @@ for line in f:
             data.append(timestep)
         timestep = []
     else:
-        line[0], line[1] = float(line[0]), float(line[1])
-        timestep.append(line)
+        # Fetch the corresponding data out of the line
+        line[xpos_index], line[ypos_index] = float(line[xpos_index]), float(line[ypos_index])
+        timestep.append([line[xpos_index], line[ypos_index]])
 
 data = np.array([np.array(xi) for xi in data])
 
@@ -34,8 +39,8 @@ def animate(i):
     xdata = data[i,:,0]
     ydata = data[i,:,1]
     line.set_data(xdata, ydata)
-    ax.set_xlim([-100, 100])
-    ax.set_ylim([-100, 100])
+    ax.set_xlim([-10, 660])
+    ax.set_ylim([-10, 660])
     return line,
 
 anim = animation.FuncAnimation(fig, animate, init_func=init, interval=25)

@@ -61,6 +61,7 @@ public class CornerGeometry {
     }
 
 
+    // TODO check my vecIn and vecOut are not the reverse polarity to what they ought...
     public SpatialVector convertDistanceToPoint (double distance) {
         /* Convert distance along a road segment into a point in space
          */
@@ -81,8 +82,8 @@ public class CornerGeometry {
         }
         // Failing that we're on the outway
         else {
-            double distOnSeg = distance - lenIn - lenArc;
-            return segEnd.sub(vecOut.scale(distOnSeg));
+            double distOnSeg = distance - (lenIn + lenArc);
+            return cornerEnd.add(vecOut.scale(distOnSeg));
         }
     }
 
