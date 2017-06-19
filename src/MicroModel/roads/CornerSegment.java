@@ -4,6 +4,8 @@ import MicroModel.SpatialVector;
 
 
 public class CornerSegment extends RoadSegment {
+    /* Corner road segment
+     */
 
     public CornerGeometry geo;
     public RoadSegment incomingSegment;
@@ -24,6 +26,11 @@ public class CornerSegment extends RoadSegment {
         connectedSegments.add(incomingSegment);
         connectionKey.put("outgoingSegment", outgoingSegment);
         connectedSegments.add(outgoingSegment);
+    }
 
+    public SpatialVector convertPositionToLocation (double distance) {
+        /* Converts position on a road segment into a cartesian coordinate
+         */
+        return geo.convertDistanceToPoint(distance);
     }
 }

@@ -1,13 +1,15 @@
 package MicroModel;
 
+import MicroModel.roads.RoadSegment;
+
 import java.util.*;
 
-// TODO need to update the car in front at each timestep...
 
-public class PrototypeVehicle {
+public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
-    // Proximate vehicles
+    // Vehicle's view of the world
     public PrototypeVehicle vehicleAhead;
+    public RoadSegment roadSegment;
 
     // Motion status
     public HashMap<String, Double> status;
@@ -38,9 +40,6 @@ public class PrototypeVehicle {
     private double maxVelocity = 80 * 1000 / (60 * 60);     // ms^-1 Max vehicle velocity is 80 kmh^-1
     private double randomNumber = Math.random() / 2;        // a random number to inject variation in driving style
 
-    // TODO hack zone
-    public double circum;
-
 
     public PrototypeVehicle (double position, double velocity, String identification) {
         this.position = position;
@@ -50,7 +49,6 @@ public class PrototypeVehicle {
 
         // Initialise the parameters with the default Weidemann params.
         setDefaultParams();
-
     }
 
     public PrototypeVehicle (double position, double velocity) {
@@ -64,6 +62,19 @@ public class PrototypeVehicle {
 
         // Initialise the parameters with the default Weidemann params.
         setDefaultParams();
+    }
+
+
+    @Override
+    public int compareTo (PrototypeVehicle otherVehicle) {
+        return new Double(position).compareTo(otherVehicle.position);
+    }
+
+
+    @Override
+    public String toString () {
+        // TODO make this better or get rid of it.
+        return String.valueOf(position);
     }
 
 
@@ -152,11 +163,11 @@ public class PrototypeVehicle {
 
     public double updateAcceleration () {
 
-        status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
-        if (vehicleAhead.position < position) {
-            // Hateful little hack for circular track...
-            status.put("dx", status.get("dx") + circum);
-        }
+//        status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
+//        if (vehicleAhead.position < position) {
+//            // Hateful little hack for circular track...
+//            status.put("dx", status.get("dx") + circum);
+//        }
 
         status.put("dv", vehicleAhead.velocity - velocity);
 
@@ -310,6 +321,14 @@ public class PrototypeVehicle {
         }
         return newAcceleration;
     }
+
+
+    public SpatialVector getLocation () {
+        /* Returns the cartesian coordinates of the vehicle
+         */
+        return roadSegment.convertPositionToLocation(position);
+    }
+
 
     public void step (double dt) {
         /* Step the vehicle by one timestep

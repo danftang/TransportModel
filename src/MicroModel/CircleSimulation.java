@@ -3,6 +3,9 @@ package MicroModel;
 import java.util.ArrayList;
 import java.util.Collections;
 
+// TODO currently broken
+
+
 public class CircleSimulation {
 
     ArrayList<PrototypeVehicle> fleet = new ArrayList<>();
@@ -40,7 +43,8 @@ public class CircleSimulation {
             double position = spacing * i;
             double velocity = Math.random() * (40 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
             PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
-            vehicle.circum = initialRoadLength;
+// TODO FIX ME ( I mean in general, but this line is now obsolete innit? )
+//            vehicle.circum = initialRoadLength;
             fleet.add(vehicle);
         }
 

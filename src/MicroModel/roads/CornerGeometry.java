@@ -3,7 +3,10 @@ package MicroModel.roads;
 import MicroModel.SpatialVector;
 import MicroModel.WriteFile;
 
+
 public class CornerGeometry {
+    /* Computes the geometry of a rounded corner with inlet and outlet straights
+     */
 
     // Initial details
     SpatialVector segStart;
