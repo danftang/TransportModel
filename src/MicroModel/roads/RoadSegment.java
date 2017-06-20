@@ -1,7 +1,7 @@
 package MicroModel.roads;
 
-import MicroModel.PrototypeVehicle;
-import MicroModel.SpatialVector;
+import MicroModel.vehicles.PrototypeVehicle;
+import MicroModel.utilities.SpatialVector;
 import MicroModel.signs.PrototypeSign;
 
 import java.util.ArrayList;

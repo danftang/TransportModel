@@ -1,4 +1,7 @@
-package MicroModel;
+package MicroModel.tests;
+
+import MicroModel.utilities.WriteFile;
+import MicroModel.vehicles.PrototypeVehicle;
 
 import java.util.ArrayList;
 import java.util.Collections;

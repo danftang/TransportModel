@@ -1,8 +1,6 @@
 package MicroModel.signs;
 
 
-import MicroModel.SpatialVector;
-
 import java.util.HashMap;
 
 // TODO prolly want 'position' to be submittable as a location vector?
@@ -43,6 +41,7 @@ public class PelicanCrossing extends PrototypeSign {
             status = statusMap.get("green");
         }
     }
+
 
     public void step (double dt) {
         /*

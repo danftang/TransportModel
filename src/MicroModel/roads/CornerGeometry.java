@@ -1,7 +1,7 @@
 package MicroModel.roads;
 
-import MicroModel.SpatialVector;
-import MicroModel.WriteFile;
+import MicroModel.utilities.SpatialVector;
+import MicroModel.utilities.WriteFile;
 
 
 public class CornerGeometry {

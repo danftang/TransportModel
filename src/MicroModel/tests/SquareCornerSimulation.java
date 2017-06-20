@@ -1,40 +1,38 @@
-package MicroModel;
+package MicroModel.tests;
 
+import MicroModel.utilities.SpatialVector;
+import MicroModel.utilities.WriteFile;
 import MicroModel.roads.CornerSegment;
 import MicroModel.roads.RoadSegment;
 import MicroModel.signs.PelicanCrossing;
-import MicroModel.signs.PrototypeSign;
+import MicroModel.vehicles.PrototypeVehicle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class SquareCornerSimulation {
+public class SquareCornerSimulation extends PrototypeSimulation {
     /* Simulation of a fleet driving around a square comprising of CornerSegment roads only
      */
 
-    ArrayList<PrototypeVehicle> fleet = new ArrayList<>();
-
     double roadLength = 0;
-
-    // Initialise a list of road segments
-    ArrayList<RoadSegment> roadSegments = new ArrayList<>();
-
-    int iterationNumber = 0;
-
-    // Set up writefile
-    WriteFile data = new WriteFile("scripts/dataSquareCorner.dat");
+    double squareSideLength;
+    int fleetSize;
 
 
     public SquareCornerSimulation (double squareSideLength, int fleetSize) {
 
-        initialiseRoad(squareSideLength);
+        this.data = new WriteFile("scripts/dataSquareCorner.dat");
+        this.squareSideLength = squareSideLength;
+        this.fleetSize = fleetSize;
+
+        initialiseRoad();
         initialiseSignage();
-        initialiseFleet(fleetSize);
+        initialiseFleet();
     }
 
 
-    public void initialiseRoad (double squareSideLength) {
+    public void initialiseRoad () {
         /* We're building this road in 4 corner parts; assemble them here
          */
         double turningRadius = 10;
@@ -102,12 +100,12 @@ public class SquareCornerSimulation {
     }
 
 
-    public void initialiseFleet (int n) {
+    public void initialiseFleet () {
          /* Initialise a fleet of n vehicles
          */
-        double spacing = roadSegments.get(0).segLength / n;
+        double spacing = roadSegments.get(0).segLength / fleetSize;
 
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<fleetSize; i++) {
             double position = spacing * i;
             double velocity = Math.random() * (20 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
             PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
@@ -118,60 +116,6 @@ public class SquareCornerSimulation {
         // Set the vehicle ahead
         for (RoadSegment road: roadSegments) {
             road.initialiseTraffic();
-        }
-    }
-
-
-    private void plotOutput (double dt) {
-
-        Double time = dt * iterationNumber;
-        for (PrototypeVehicle vehicle: fleet) {
-            SpatialVector pos = vehicle.getLocation();
-            data.writeToFile("veh " +
-                              Double.toString(time) +" "+
-                              Double.toString(pos.x) +" "+
-                              Double.toString(pos.y));
-        }
-        for (RoadSegment road: roadSegments) {
-            for (PrototypeSign sign: road.signage) {
-                SpatialVector pos = road.convertPositionToLocation(sign.position);
-                data.writeToFile("sig " +
-                                 Double.toString(time) +" "+
-                                 Double.toString(pos.x) +" "+
-                                 Double.toString(pos.y) +" "+
-                                 Integer.toString(sign.status));
-            }
-
-        }
-        data.writeToFile("\n \n");
-    }
-
-
-    public void step (double dt) {
-        /* Step forwards by dt
-         */
-
-        // Update the vehicles for the given timestep
-        for (PrototypeVehicle vehicle: fleet) {
-            vehicle.step(dt);
-        }
-
-        // Update the road segments to assign to each vehicle the vehicle-ahead and its dx from it
-        for (RoadSegment road: roadSegments) {
-            road.step(dt);
-        }
-
-        plotOutput(dt);
-        iterationNumber += 1;
-    }
-
-
-    public void run (double dt, double simDuration) {
-        /* Run the sim
-         */
-
-        for (int i=0; i*dt<=simDuration; i++) {
-            step(dt);
         }
     }
 

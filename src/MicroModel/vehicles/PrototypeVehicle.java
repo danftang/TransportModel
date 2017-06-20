@@ -1,5 +1,6 @@
-package MicroModel;
+package MicroModel.vehicles;
 
+import MicroModel.utilities.SpatialVector;
 import MicroModel.roads.RoadSegment;
 import MicroModel.signs.PrototypeSign;
 

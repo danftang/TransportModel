@@ -1,6 +1,6 @@
 package MicroModel.roads;
 
-import MicroModel.SpatialVector;
+import MicroModel.utilities.SpatialVector;
 
 
 public class CornerSegment extends RoadSegment {
