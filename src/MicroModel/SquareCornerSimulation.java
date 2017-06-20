@@ -2,6 +2,8 @@ package MicroModel;
 
 import MicroModel.roads.CornerSegment;
 import MicroModel.roads.RoadSegment;
+import MicroModel.signs.PelicanCrossing;
+import MicroModel.signs.PrototypeSign;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +29,7 @@ public class SquareCornerSimulation {
     public SquareCornerSimulation (double squareSideLength, int fleetSize) {
 
         initialiseRoad(squareSideLength);
+        initialiseSignage();
         initialiseFleet(fleetSize);
     }
 
@@ -87,6 +90,18 @@ public class SquareCornerSimulation {
 
     }
 
+
+    public void initialiseSignage () {
+        /* Initialise some traffic lights
+         */
+        // Let's place a traffic light a third of the way along each segment
+        for (RoadSegment road: roadSegments) {
+            PelicanCrossing signal = new PelicanCrossing(road.segLength/3.,10, 2, 10, false);
+            road.signage.add(signal);
+        }
+    }
+
+
     public void initialiseFleet (int n) {
          /* Initialise a fleet of n vehicles
          */
@@ -112,9 +127,21 @@ public class SquareCornerSimulation {
         Double time = dt * iterationNumber;
         for (PrototypeVehicle vehicle: fleet) {
             SpatialVector pos = vehicle.getLocation();
-            data.writeToFile(String.format(Double.toString(time) +" "+
-                                           Double.toString(pos.x) +" "+
-                                           Double.toString(pos.y)));
+            data.writeToFile("veh " +
+                              Double.toString(time) +" "+
+                              Double.toString(pos.x) +" "+
+                              Double.toString(pos.y));
+        }
+        for (RoadSegment road: roadSegments) {
+            for (PrototypeSign sign: road.signage) {
+                SpatialVector pos = road.convertPositionToLocation(sign.position);
+                data.writeToFile("sig " +
+                                 Double.toString(time) +" "+
+                                 Double.toString(pos.x) +" "+
+                                 Double.toString(pos.y) +" "+
+                                 Integer.toString(sign.status));
+            }
+
         }
         data.writeToFile("\n \n");
     }
@@ -131,7 +158,7 @@ public class SquareCornerSimulation {
 
         // Update the road segments to assign to each vehicle the vehicle-ahead and its dx from it
         for (RoadSegment road: roadSegments) {
-            road.updateTraffic();
+            road.step(dt);
         }
 
         plotOutput(dt);

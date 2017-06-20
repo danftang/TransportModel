@@ -2,6 +2,7 @@ package MicroModel.roads;
 
 import MicroModel.PrototypeVehicle;
 import MicroModel.SpatialVector;
+import MicroModel.signs.PrototypeSign;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,9 @@ public abstract class RoadSegment {
 
     // Vehicles on the segment
     public LinkedList<PrototypeVehicle> traffic = new LinkedList<>();
+
+    // Lights and signage
+    public ArrayList<PrototypeSign> signage = new ArrayList<>();
 
 
     // Methods which extensions to this abstract class must overide:
@@ -92,5 +96,19 @@ public abstract class RoadSegment {
                                                 traffic.get(i+1).vehicleLength);
             }
         }
+    }
+
+
+    public void updateSignage (double dt) {
+
+        for (PrototypeSign sign: signage) {
+            sign.step(dt);
+        }
+    }
+
+
+    public void step (double dt) {
+        updateTraffic();
+        updateSignage(dt);
     }
 }

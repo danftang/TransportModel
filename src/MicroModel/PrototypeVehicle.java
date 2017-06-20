@@ -1,6 +1,7 @@
 package MicroModel;
 
 import MicroModel.roads.RoadSegment;
+import MicroModel.signs.PrototypeSign;
 
 import java.util.*;
 
@@ -9,6 +10,7 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
     // Vehicle's view of the world
     public PrototypeVehicle vehicleAhead;
+    public PrototypeSign signageAhead;
     public RoadSegment roadSegment;
 
     // Motion status
@@ -169,6 +171,8 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 //            // Hateful little hack for circular track...
 //            status.put("dx", status.get("dx") + circum);
 //        }
+
+        // TODO CHECK IF THE SIGNAGE AHEAD IS AT STOP AND IS CLOSER THAN THE VEHICLE AHEAD IN WHICH CASE OVERRIDE DX AND DV
 
         status.put("dv", vehicleAhead.velocity - velocity);
 
