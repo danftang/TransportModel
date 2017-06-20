@@ -15,7 +15,6 @@ public class SquareCornerSimulation extends PrototypeSimulation {
     /* Simulation of a fleet driving around a square comprising of CornerSegment roads only
      */
 
-    double roadLength = 0;
     double squareSideLength;
     int fleetSize;
 
@@ -66,26 +65,7 @@ public class SquareCornerSimulation extends PrototypeSimulation {
         }
 
         // Connect the segments together by telling each one which road is feeding inward and accepting outward traffic
-        for (int i = 0; i < roadSegments.size(); i++) {
-            int segInIndex;
-            int segOutIndex;
-            if (i == roadSegments.size() - 1) {
-                segInIndex = i - 1;
-                segOutIndex = 0;
-            } else if (i == 0) {
-                segInIndex = roadSegments.size() - 1;
-                segOutIndex = i + 1;
-            } else {
-                segInIndex = i - 1;
-                segOutIndex = i + 1;
-            }
-            roadSegments.get(i).connectedSegments.add(roadSegments.get(segInIndex));
-            roadSegments.get(i).connectedSegments.add(roadSegments.get(segOutIndex));
-
-            // And tot up the complete road length
-            roadLength += roadSegments.get(i).segLength;
-        }
-
+        joinOrderedSegments();
     }
 
 

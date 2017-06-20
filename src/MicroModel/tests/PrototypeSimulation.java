@@ -21,6 +21,28 @@ public abstract class PrototypeSimulation {
     public abstract void initialiseFleet ();
 
 
+    public void joinOrderedSegments () {
+        /* Assuming the road segments in the roadSegments list are ordered, this joins them up
+         */
+        // Connect the segments together by telling each one which road is feeding inward and accepting outward traffic
+        for (int i=0; i<roadSegments.size(); i++) {
+            int segInIndex;
+            int segOutIndex;
+            if (i == roadSegments.size()-1) {
+                segInIndex = i - 1;
+                segOutIndex = 0;
+            } else if (i == 0) {
+                segInIndex = roadSegments.size()-1;
+                segOutIndex = i + 1;
+            } else {
+                segInIndex = i - 1;
+                segOutIndex = i + 1;
+            }
+            roadSegments.get(i).connectedSegments.add(roadSegments.get(segInIndex));
+            roadSegments.get(i).connectedSegments.add(roadSegments.get(segOutIndex));
+        }
+    }
+
     private void plotOutput (double dt) {
 
         Double time = dt * iterationNumber;

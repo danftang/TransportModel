@@ -6,7 +6,7 @@ from matplotlib import animation
 xpos_index = 2
 ypos_index = 3
 
-filename = "dataSquareCorner.dat"
+filename = "Oblong.dat"
 f = open(filename, 'r')
 
 veh_data = []
