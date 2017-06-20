@@ -31,7 +31,7 @@ public abstract class RoadSegment {
     public ArrayList<PrototypeSign> signage = new ArrayList<>();
 
 
-    // Methods which extensions to this abstract class must overide:
+    // Methods which extensions to this abstract class must override:
     public abstract SpatialVector convertPositionToLocation (double position);
 
 

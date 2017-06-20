@@ -10,7 +10,6 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
     // Vehicle's view of the world
     public PrototypeVehicle vehicleAhead;
-    public PrototypeSign signageAhead;
     public RoadSegment roadSegment;
 
     // Motion status
@@ -164,17 +163,42 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
         params.put("CC5", 2.1);
     }
 
+
+    public double checkSignage () {
+        /* Check this and the next segment for stop signage and return the distance to the closest stop signal, or an
+        arbitrarily high number if there are no stop signals in this or the next segment. */
+
+        if (roadSegment.signage.size() > 0) {
+            // Check this segment for signage
+            for (PrototypeSign sign : roadSegment.signage) {
+                if (sign.position > position && sign.stop) {
+                    return sign.position - position;
+                }
+            }
+        } else if (roadSegment.connectedSegments.get(1).signage.size() > 0) {
+            // Check the next segment for signage
+            for (PrototypeSign sign: roadSegment.connectedSegments.get(1).signage) {
+                if (sign.position > position && sign.stop) {
+                    return sign.position - position;
+                }
+            }
+        }
+        return 1000; // Arbitrarily high number that won't peak the car's interest
+    }
+
     public double updateAcceleration () {
-
-//        status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
-//        if (vehicleAhead.position < position) {
-//            // Hateful little hack for circular track...
-//            status.put("dx", status.get("dx") + circum);
-//        }
-
-        // TODO CHECK IF THE SIGNAGE AHEAD IS AT STOP AND IS CLOSER THAN THE VEHICLE AHEAD IN WHICH CASE OVERRIDE DX AND DV
+        /* Update the acceleration of the vehicle based on dx and dv
+         */
 
         status.put("dv", vehicleAhead.velocity - velocity);
+
+        status.put("dx_sign", checkSignage());
+
+        // Check for signage
+        if (status.get("dx_sign") < status.get("dx")) {
+            status.put("dx", status.get("dx_sign"));
+            status.put("dv", 0 - velocity);
+        }
 
         if (vehicleAhead.velocity <= 0) {
             // Vehicle ahead is stopped so following distance = stopping distance
