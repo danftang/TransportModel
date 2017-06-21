@@ -32,5 +32,6 @@ public class Vehicle extends Entity {
     double              distanceAlongEdge;
     int                 routeLeg;
     double              speed;
+    int                 localTime;
     Edge []             route;
 }
