@@ -15,7 +15,7 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
     // Motion status
     public HashMap<String, Double> status;
-    public HashMap<String, String> statusDescription;
+//    public HashMap<String, String> statusDescription;
 
     // Motion variables
     public double position;
@@ -32,42 +32,32 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
     public HashMap<String, String> newReport;
 
     // Vehicle properties
-    public String identification;
+//    public String identification;
     public double vehicleLength = 5.0;                      // m
-    public double vehicleWidth = 2.0;                       // m
+//    public double vehicleWidth = 2.0;                       // m
 
     // Driving characteristics
-    private double maxDeceleration = -9.81;                 // ms^-2 Max deceleration at 1G
-    private double idealVelocity = 35;                      // ms^-1 Velocity the driver 'wants' to travel at
+    private double maxDeceleration = -9.81*2;                 // ms^-2 Max deceleration at 1G
+    private double idealVelocity = 50 * 1000 / (60*60);     // ms^-1 Velocity the driver 'wants' to travel at
     private double maxVelocity = 80 * 1000 / (60 * 60);     // ms^-1 Max vehicle velocity is 80 kmh^-1
     private double randomNumber = Math.random() / 2;        // a random number to inject variation in driving style
 
 
-    public PrototypeVehicle (double position, double velocity, String identification) {
-        this.position = position;
-        this.velocity = velocity;
-        this.acceleration = 0;
-        this.identification = identification;
-
-        // Initialise the parameters with the default Weidemann params.
-        setDefaultParams();
-    }
-
     public PrototypeVehicle (double position, double velocity) {
-
         this.position = position;
         this.velocity = velocity;
         this.acceleration = 0;
-
-        // Set a random identification
-        this.identification = UUID.randomUUID().toString().substring(0, 5);
+//        this.identification = identification;
 
         // Initialise the parameters with the default Weidemann params.
         setDefaultParams();
     }
 
+    public PrototypeVehicle (double position, double velocity, String dummy) {
+        this(position, velocity);
+    }
 
-    @Override
+        @Override
     public int compareTo (PrototypeVehicle otherVehicle) {
         return new Double(position).compareTo(otherVehicle.position);
     }
@@ -117,11 +107,11 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
         ));
 
         status = new HashMap<>();
-        statusDescription = new HashMap<>();
+//        statusDescription = new HashMap<>();
 
         for (int i=0; i<variables.size(); i+=2) {
             status.put(variables.get(i), 0.0);
-            statusDescription.put(variables.get(i), variables.get(i+1));
+//            statusDescription.put(variables.get(i), variables.get(i+1));
         }
 
         List<String> reportHeadings = new ArrayList<>(Arrays.asList(
@@ -157,11 +147,12 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
     public void setDefaultParams () {
         setOriginalParams();
-        params.put("CC0", 1.35);
-        params.put("CC1", 1.17);
-        params.put("CC2", 8.0);
-        params.put("CC4", -1.5);
-        params.put("CC5", 2.1);
+        params.put("CC0", 20.0);
+//        params.put("CC0", 1.35);
+//        params.put("CC1", 1.17);
+//        params.put("CC2", 8.0);
+//        params.put("CC4", -1.5);
+//        params.put("CC5", 2.1);
     }
 
 
@@ -192,14 +183,15 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
          */
 
         status.put("dv", vehicleAhead.velocity - velocity);
+        status.put("dx", vehicleAhead.position - position);
 
-        status.put("dx_sign", checkSignage());
+//        status.put("dx_sign", checkSignage());
 
-        // Check for signage
-        if (status.get("dx_sign") < status.get("dx")) {
-            status.put("dx", status.get("dx_sign"));
-            status.put("dv", 0 - velocity);
-        }
+//        // Check for signage
+//        if (status.get("dx_sign") < status.get("dx")) {
+//            status.put("dx", status.get("dx_sign"));
+//            status.put("dv", 0 - velocity);
+//        }
 
         if (vehicleAhead.velocity <= 0) {
             // Vehicle ahead is stopped so following distance = stopping distance
@@ -211,7 +203,7 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
                 vSlow = velocity;
             } else {
                 // Vehicle ahead is going faster than this one
-                vSlow = vehicleAhead.velocity + status.get("dv") * (randomNumber - 0.5);
+                vSlow = vehicleAhead.velocity + status.get("dv");// * (randomNumber - 0.5);
             }
             // Following distance is stopping distance + following time * velocity from above
             status.put("sdxc", params.get("CC0") + params.get("CC1") * vSlow);
@@ -333,7 +325,7 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
         // Compute the new acceleration
         if (status.get("dx") > status.get("sdxc")) {
             double maxAcceleration;
-            if (report.get("status") == "D") {
+            if (report.get("status").equals("D")) {
                 newAcceleration = params.get("CC7");
             } else {
                 maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
@@ -365,9 +357,15 @@ public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
          */
         // Update velocity
         acceleration = updateAcceleration();
+        if(acceleration<0) {
+            acceleration = Math.min(-velocity / acceleration, dt); // in-case we screech to a halt mid-timestep
+        }
+        position += velocity * dt + 0.5*acceleration*dt*dt;
         velocity += acceleration * dt;
-        velocity = Math.max(velocity, 0);
-        position += velocity * dt;
+        if(position > vehicleAhead.position) {
+            position = vehicleAhead.position;
+            velocity = 0.0;
+        }
         // Switch params at t+1 to t
         report = newReport;
     }

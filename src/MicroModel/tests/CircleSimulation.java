@@ -45,9 +45,9 @@ public class CircleSimulation {
         for (int i=0; i<n; i++) {
             double position = spacing * i;
             double velocity = Math.random() * (40 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
-            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
+            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity);
 // TODO FIX ME ( I mean in general, but this line is now obsolete innit? )
-//            vehicle.circum = initialRoadLength;
+//            vehicle.circum = roadLength;
             fleet.add(vehicle);
         }
 

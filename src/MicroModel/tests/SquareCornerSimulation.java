@@ -88,7 +88,7 @@ public class SquareCornerSimulation extends PrototypeSimulation {
         for (int i=0; i<fleetSize; i++) {
             double position = spacing * i;
             double velocity = Math.random() * (20 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
-            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
+            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity);
             fleet.add(vehicle);
             roadSegments.get(0).traffic.add(vehicle);
         }
