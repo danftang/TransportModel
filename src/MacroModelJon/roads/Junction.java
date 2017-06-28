@@ -1,9 +1,6 @@
 package MacroModelJon.roads;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Junction {
 
@@ -14,13 +11,12 @@ public class Junction {
 
     private String name;
 
-    private int timeToTraverseJunction = 1;
+    private int timestepsToTraverseJunction = 1;
     private int vehiclesAcceptedPerIncomingPerTimestep = 1;
 
     private List<Vehicle> vehiclesToRemove = new ArrayList<>();
 
-    public Junction(RoadNetwork roadNetwork, Coordinates coordinates, String name) {
-        roadNetwork.add(this);
+    public Junction(Coordinates coordinates, String name) {
         this.coordinates = coordinates;
         this.name = name;
     }
@@ -31,6 +27,11 @@ public class Junction {
 
     public Map<Junction, Road> getOutgoingRoads() {
         return outgoingRoads;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     public void addIncomingRoad(Junction fromJunction, Road road) {
@@ -48,13 +49,13 @@ public class Junction {
 
     public void take(Vehicle vehicle) {
         vehicle.arrivedAtJunction();
-        Junction nextJunctionOnRoute = vehicle.getNextJunctionOnRoute();
-        long exitTimestep = Simulation.getTimestep() + timeToTraverseJunction;
-
-//        Logger.info("Vehicle " + vehicle.getName() + " is at junction " + name +
-//                " and is trying to go to " + nextJunctionOnRoute.name + " with exit timestep " + exitTimestep);
-
-        vehiclesByExit.get(nextJunctionOnRoute).put(vehicle, exitTimestep);
+        Optional<Junction> nextJunctionOnRoute = vehicle.getNextJunctionOnRoute();
+        if (nextJunctionOnRoute.isPresent()) {
+            long exitTimestep = Simulation.getTimestep() + timestepsToTraverseJunction;
+            vehiclesByExit.get(nextJunctionOnRoute.get()).put(vehicle, exitTimestep);
+        } else {
+            Logger.info("Vehicle " + vehicle.getName() + " has reached its destination junction of " + name);
+        }
     }
 
     public void step(long timestep) {
@@ -63,13 +64,19 @@ public class Junction {
         }
     }
 
+    public void report() {
+        for (Junction junction : vehiclesByExit.keySet()) {
+            Map<Vehicle, Long> vehiclesExitingTowardsJunction = vehiclesByExit.get(junction);
+
+            if (vehiclesExitingTowardsJunction.size() > 0) {
+                Logger.info("Junction " + name + " contains " + vehiclesExitingTowardsJunction.size() +
+                        " vehicles travelling towards " + junction.name);
+            }
+        }
+    }
+
     private void exitVehiclesTowardsJunction(long timestep, Junction junction) {
         Map<Vehicle, Long> vehiclesExitingTowardsJunction = vehiclesByExit.get(junction);
-
-        if (vehiclesExitingTowardsJunction.size() > 0) {
-            Logger.info("Junction " + name + " contains " + vehiclesExitingTowardsJunction.size() +
-                    " vehicles travelling towards " + junction.name);
-        }
 
         vehiclesToRemove.clear();
         for (Map.Entry<Vehicle, Long> entry : vehiclesExitingTowardsJunction.entrySet()) {

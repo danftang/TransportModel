@@ -20,10 +20,10 @@ public class CacheDirectory {
 
     public CacheDirectory(String path, String fileExtension, long maxCachedFileAgeMillis) {
         this.path = path;
+        new File(path).mkdirs();
         this.cachedFiles = getCachedFiles();
         this.fileExtension = fileExtension;
         this.maxCachedFileAgeMillis = maxCachedFileAgeMillis;
-        new File(path).mkdirs();
     }
 
     public String loadFromCache(String name) {

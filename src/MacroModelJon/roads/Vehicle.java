@@ -1,6 +1,7 @@
 package MacroModelJon.roads;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Vehicle {
 
@@ -17,12 +18,16 @@ public class Vehicle {
         return name;
     }
 
-    public Junction getNextJunctionOnRoute() {
-        return route.get(nextDestinationIdx);
+    public Optional<Junction> getNextJunctionOnRoute() {
+        if (nextDestinationIdx < route.size()) {
+            return Optional.of(route.get(nextDestinationIdx));
+        } else {
+            return Optional.empty();
+        }
     }
 
     public void arrivedAtJunction() {
-        nextDestinationIdx = (nextDestinationIdx + 1) % route.size();
+        nextDestinationIdx++;
     }
 
     public int calcTimestepsToTraverseRoad(Road road) {

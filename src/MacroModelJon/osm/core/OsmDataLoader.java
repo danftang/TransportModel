@@ -1,13 +1,9 @@
 package MacroModelJon.osm.core;
 
-import org.w3c.dom.Document;
-import MacroModelJon.osm.OsmRoadNetworkParser;
-import MacroModelJon.roads.Junction;
 import MacroModelJon.roads.Logger;
-import MacroModelJon.roads.RoadNetwork;
-import MacroModelJon.roads.RouteSearch;
 import MacroModelJon.utils.FileUtils;
 import MacroModelJon.utils.StringUtils;
+import org.w3c.dom.Document;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +14,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class OsmDataLoader {
@@ -32,7 +27,7 @@ public class OsmDataLoader {
         osmEndpoints.add("http://overpass.preprocessors.osm.rambler.ru/cgi/");
     }
 
-    private static Optional<Document> getData(double swLat, double swLon, double neLat, double neLon) {
+    public static Optional<Document> getData(double swLat, double swLon, double neLat, double neLon) {
         String studyArea = swLat + "," + swLon + "," + neLat + "," + neLon;
         String studyAreaCacheName = makeStudyAreaCacheName(studyArea);
         Logger.info("OsmDataLoader: Loading OSM data for bounding box " + swLat + ", " + swLon + " to " + neLat +
@@ -110,40 +105,11 @@ public class OsmDataLoader {
         try {
             return FileUtils.readXmlFile(filePath);
         } catch (IOException ex) {
-            Logger.error("OsmDataLoader: Could not read cached OSM file: " +  ex.getMessage());
+            Logger.error("OsmDataLoader: Could not read cached OSM file: " + ex.getMessage());
         } catch (Exception ex) {
-            Logger.error("OsmDataLoader: Could not parse cached OSM file as XML: " +  ex.getMessage());
+            Logger.error("OsmDataLoader: Could not parse cached OSM file as XML: " + ex.getMessage());
         }
 
         return null;
-    }
-
-    public static void main(String[] args) {
-        Optional<Document> rawData = OsmDataLoader.getData(51.0, 0, 51.1, 0.1);
-        if (rawData.isPresent()) {
-            OsmData data = new OsmData(rawData.get());
-            RoadNetwork roadNetwork = OsmRoadNetworkParser.makeRoadNetwork(data);
-            Logger.info("Made a road network with " + roadNetwork.getJunctions().size() + " junctions and " +
-                    roadNetwork.getRoads().size() + " roads");
-
-            for (int i = 0; i < 100; i++) {
-                RouteSearch.Route route = getRandomRoute(roadNetwork);
-                if (route.getRouteSteps().isEmpty()) {
-                    Logger.info("Could not find route a route from " + route.getOrigin().getCoordinates() + " to " + route.getDestination().getCoordinates() +
-                            " with cost " + route.getCost() + " and steps " + route.getRouteSteps().size());
-                } else {
-                    Logger.info("Found a route from " + route.getOrigin().getCoordinates() + " to " + route.getDestination().getCoordinates() +
-                            " with cost " + route.getCost() + " and steps " + route.getRouteSteps().size());
-                }
-            }
-        }
-    }
-
-    public static RouteSearch.Route getRandomRoute(RoadNetwork roadNetwork) {
-        List<Junction> junctions = roadNetwork.getJunctions();
-        Random random = new Random();
-        Junction junctionA = junctions.get(random.nextInt(junctions.size()));
-        Junction junctionB = junctions.get(random.nextInt(junctions.size()));
-        return new RouteSearch().findRoute(junctionA, junctionB);
     }
 }

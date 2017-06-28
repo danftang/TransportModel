@@ -3,7 +3,9 @@ package MacroModelJon.osm;
 import MacroModelJon.osm.core.OsmData;
 import MacroModelJon.osm.core.OsmNode;
 import MacroModelJon.osm.core.OsmWay;
-import MacroModelJon.roads.*;
+import MacroModelJon.roads.Coordinates;
+import MacroModelJon.roads.Junction;
+import MacroModelJon.roads.RoadNetwork;
 import MacroModelJon.utils.CoordinateUtils;
 
 import java.util.*;
@@ -52,8 +54,7 @@ public class OsmRoadNetworkParser {
         Map<OsmNode, Junction> junctions = new HashMap<>();
         for (OsmNode junctionOsmNode : junctionNodes) {
             Coordinates coordinates = new Coordinates(junctionOsmNode.getLat(), junctionOsmNode.getLon());
-            // Junction adds itself to road network during construction
-            Junction junction = new Junction(roadNetwork, coordinates, Long.toString(junctionOsmNode.getId()));
+            Junction junction = roadNetwork.createJunction(coordinates, Long.toString(junctionOsmNode.getId()));
             junctions.put(junctionOsmNode, junction);
         }
 
@@ -102,7 +103,7 @@ public class OsmRoadNetworkParser {
     }
 
     private static void addRoadsFromOsmWayToNetwork(RoadNetwork roadNetwork, OsmWay osmRoad,
-                                                   Map<OsmNode, Junction> junctionsByOsmNode) {
+                                                    Map<OsmNode, Junction> junctionsByOsmNode) {
 
         Iterator<OsmNode> roadNodeIterator = osmRoad.getNodes().iterator();
         OsmNode prevNode = roadNodeIterator.next();
@@ -134,13 +135,15 @@ public class OsmRoadNetworkParser {
 
     private static void addRoad(OsmWay osmRoad, RoadNetwork roadNetwork, Junction startJunction, Junction endJunction,
                                 double cumulativeMetres) {
+
         String name = Long.toString(osmRoad.getId());
+
         // Road adds itself to road network during construction
-        new Road(roadNetwork, startJunction, endJunction, cumulativeMetres, name);
+        roadNetwork.createRoad(startJunction, endJunction, cumulativeMetres, name);
 
         boolean isOneway = osmRoad.getTags().containsKey("oneway") && osmRoad.getTags().get("oneway").contains("yes");
         if (!isOneway) {
-            new Road(roadNetwork, endJunction, startJunction, cumulativeMetres, name);
+            roadNetwork.createRoad(endJunction, startJunction, cumulativeMetres, name);
         }
     }
 }

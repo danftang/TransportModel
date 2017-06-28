@@ -16,9 +16,7 @@ public class Road {
 
     private String name;
 
-    public Road(RoadNetwork roadNetwork, Junction start, Junction end, double length, String name) {
-
-        roadNetwork.add(this);
+    public Road(Junction start, Junction end, double length, String name) {
         this.start = start;
         this.end = end;
         this.length = length;
@@ -38,13 +36,14 @@ public class Road {
 
     public void step(long timestep) {
         updateVehiclesAwaitingExit(timestep);
+        exitVehiclesFromRoad();
+    }
 
+    public void report() {
         if (travellingAlongRoad.size() + waitingToExitingRoad.size() > 0) {
             Logger.info("Road " + name + " has " + travellingAlongRoad.size() + " vehicles travelling along it and " +
                     waitingToExitingRoad.size() + " waiting to exit.");
         }
-
-        exitVehiclesFromRoad();
     }
 
     private void updateVehiclesAwaitingExit(long timestep) {
