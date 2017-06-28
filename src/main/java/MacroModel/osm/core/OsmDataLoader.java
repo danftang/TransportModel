@@ -1,8 +1,8 @@
-package MacroModelJon.osm.core;
+package MacroModel.osm.core;
 
-import MacroModelJon.roads.Logger;
-import MacroModelJon.utils.FileUtils;
-import MacroModelJon.utils.StringUtils;
+import MacroModel.roads.Logger;
+import MacroModel.utils.FileUtils;
+import MacroModel.utils.StringUtils;
 import org.w3c.dom.Document;
 
 import java.io.BufferedReader;

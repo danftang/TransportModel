@@ -1,12 +1,12 @@
-package MacroModelJon.osm;
+package MacroModel.osm;
 
-import MacroModelJon.osm.core.OsmData;
-import MacroModelJon.osm.core.OsmNode;
-import MacroModelJon.osm.core.OsmWay;
-import MacroModelJon.roads.Coordinates;
-import MacroModelJon.roads.Junction;
-import MacroModelJon.roads.RoadNetwork;
-import MacroModelJon.utils.CoordinateUtils;
+import MacroModel.osm.core.OsmData;
+import MacroModel.osm.core.OsmNode;
+import MacroModel.osm.core.OsmWay;
+import MacroModel.roads.Coordinates;
+import MacroModel.roads.Junction;
+import MacroModel.roads.RoadNetwork;
+import MacroModel.utils.CoordinateUtils;
 
 import java.util.*;
 

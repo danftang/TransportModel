@@ -1,4 +1,4 @@
-package MacroModelJon.utils;
+package MacroModel.utils;
 
 import java.util.Collection;
 

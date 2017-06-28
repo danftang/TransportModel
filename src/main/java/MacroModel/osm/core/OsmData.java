@@ -1,9 +1,9 @@
-package MacroModelJon.osm.core;
+package MacroModel.osm.core;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import MacroModelJon.roads.Logger;
+import MacroModel.roads.Logger;
 
 import java.util.*;
 

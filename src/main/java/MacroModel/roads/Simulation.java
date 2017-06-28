@@ -1,8 +1,8 @@
-package MacroModelJon.roads;
+package MacroModel.roads;
 
-import MacroModelJon.osm.OsmRoadNetworkParser;
-import MacroModelJon.osm.core.OsmData;
-import MacroModelJon.osm.core.OsmDataLoader;
+import MacroModel.osm.OsmRoadNetworkParser;
+import MacroModel.osm.core.OsmData;
+import MacroModel.osm.core.OsmDataLoader;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;

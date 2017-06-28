@@ -1,4 +1,4 @@
-package MacroModelJon.utils;
+package MacroModel.utils;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;

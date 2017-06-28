@@ -1,4 +1,4 @@
-package MacroModelJon.roads;
+package MacroModel.roads;
 
 import java.util.*;
 
