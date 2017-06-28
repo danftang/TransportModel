@@ -1,7 +1,13 @@
-package MicroModel;
+package MicroModel.tests;
+
+import MicroModel.utilities.WriteFile;
+import MicroModel.vehicles.PrototypeVehicle;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+// TODO currently broken
+
 
 public class CircleSimulation {
 
@@ -39,8 +45,9 @@ public class CircleSimulation {
         for (int i=0; i<n; i++) {
             double position = spacing * i;
             double velocity = Math.random() * (40 * 1000 / 3600);         // Set some random speed between 0 & 40 kmh^-1
-            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity, Integer.toString(i));
-            vehicle.circum = initialRoadLength;
+            PrototypeVehicle vehicle = new PrototypeVehicle(position, velocity);
+// TODO FIX ME ( I mean in general, but this line is now obsolete innit? )
+//            vehicle.circum = roadLength;
             fleet.add(vehicle);
         }
 

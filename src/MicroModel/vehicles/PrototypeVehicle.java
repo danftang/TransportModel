@@ -1,17 +1,21 @@
-package MicroModel;
+package MicroModel.vehicles;
+
+import MicroModel.utilities.SpatialVector;
+import MicroModel.roads.RoadSegment;
+import MicroModel.signs.PrototypeSign;
 
 import java.util.*;
 
-// TODO need to update the car in front at each timestep...
 
-public class PrototypeVehicle {
+public class PrototypeVehicle implements Comparable<PrototypeVehicle> {
 
-    // Proximate vehicles
+    // Vehicle's view of the world
     public PrototypeVehicle vehicleAhead;
+    public RoadSegment roadSegment;
 
     // Motion status
     public HashMap<String, Double> status;
-    public HashMap<String, String> statusDescription;
+//    public HashMap<String, String> statusDescription;
 
     // Motion variables
     public double position;
@@ -28,42 +32,41 @@ public class PrototypeVehicle {
     public HashMap<String, String> newReport;
 
     // Vehicle properties
-    public String identification;
+//    public String identification;
     public double vehicleLength = 5.0;                      // m
-    public double vehicleWidth = 2.0;                       // m
+//    public double vehicleWidth = 2.0;                       // m
 
     // Driving characteristics
-    private double maxDeceleration = -9.81;                 // ms^-2 Max deceleration at 1G
-    private double idealVelocity = 35;                      // ms^-1 Velocity the driver 'wants' to travel at
+    private double maxDeceleration = -9.81*2;                 // ms^-2 Max deceleration at 1G
+    private double idealVelocity = 50 * 1000 / (60*60);     // ms^-1 Velocity the driver 'wants' to travel at
     private double maxVelocity = 80 * 1000 / (60 * 60);     // ms^-1 Max vehicle velocity is 80 kmh^-1
     private double randomNumber = Math.random() / 2;        // a random number to inject variation in driving style
 
-    // TODO hack zone
-    public double circum;
-
-
-    public PrototypeVehicle (double position, double velocity, String identification) {
-        this.position = position;
-        this.velocity = velocity;
-        this.acceleration = 0;
-        this.identification = identification;
-
-        // Initialise the parameters with the default Weidemann params.
-        setDefaultParams();
-
-    }
 
     public PrototypeVehicle (double position, double velocity) {
-
         this.position = position;
         this.velocity = velocity;
         this.acceleration = 0;
-
-        // Set a random identification
-        this.identification = UUID.randomUUID().toString().substring(0, 5);
+//        this.identification = identification;
 
         // Initialise the parameters with the default Weidemann params.
         setDefaultParams();
+    }
+
+    public PrototypeVehicle (double position, double velocity, String dummy) {
+        this(position, velocity);
+    }
+
+        @Override
+    public int compareTo (PrototypeVehicle otherVehicle) {
+        return new Double(position).compareTo(otherVehicle.position);
+    }
+
+
+    @Override
+    public String toString () {
+        // TODO make this better or get rid of it.
+        return String.valueOf(position);
     }
 
 
@@ -104,11 +107,11 @@ public class PrototypeVehicle {
         ));
 
         status = new HashMap<>();
-        statusDescription = new HashMap<>();
+//        statusDescription = new HashMap<>();
 
         for (int i=0; i<variables.size(); i+=2) {
             status.put(variables.get(i), 0.0);
-            statusDescription.put(variables.get(i), variables.get(i+1));
+//            statusDescription.put(variables.get(i), variables.get(i+1));
         }
 
         List<String> reportHeadings = new ArrayList<>(Arrays.asList(
@@ -141,24 +144,54 @@ public class PrototypeVehicle {
         params.put("CC9", 1.5);
     }
 
+
     public void setDefaultParams () {
         setOriginalParams();
-        params.put("CC0", 1.35);
-        params.put("CC1", 1.17);
-        params.put("CC2", 8.0);
-        params.put("CC4", -1.5);
-        params.put("CC5", 2.1);
+        params.put("CC0", 20.0);
+//        params.put("CC0", 1.35);
+//        params.put("CC1", 1.17);
+//        params.put("CC2", 8.0);
+//        params.put("CC4", -1.5);
+//        params.put("CC5", 2.1);
+    }
+
+
+    public double checkSignage () {
+        /* Check this and the next segment for stop signage and return the distance to the closest stop signal, or an
+        arbitrarily high number if there are no stop signals in this or the next segment. */
+
+        if (roadSegment.signage.size() > 0) {
+            // Check this segment for signage
+            for (PrototypeSign sign : roadSegment.signage) {
+                if (sign.position > position && sign.stop) {
+                    return sign.position - position;
+                }
+            }
+        } else if (roadSegment.connectedSegments.get(1).signage.size() > 0) {
+            // Check the next segment for signage
+            for (PrototypeSign sign: roadSegment.connectedSegments.get(1).signage) {
+                if (sign.position > position && sign.stop) {
+                    return sign.position - position;
+                }
+            }
+        }
+        return 1000; // Arbitrarily high number that won't peak the car's interest
     }
 
     public double updateAcceleration () {
-
-        status.put("dx", vehicleAhead.position - position - vehicleAhead.vehicleLength);
-        if (vehicleAhead.position < position) {
-            // Hateful little hack for circular track...
-            status.put("dx", status.get("dx") + circum);
-        }
+        /* Update the acceleration of the vehicle based on dx and dv
+         */
 
         status.put("dv", vehicleAhead.velocity - velocity);
+        status.put("dx", vehicleAhead.position - position);
+
+//        status.put("dx_sign", checkSignage());
+
+//        // Check for signage
+//        if (status.get("dx_sign") < status.get("dx")) {
+//            status.put("dx", status.get("dx_sign"));
+//            status.put("dv", 0 - velocity);
+//        }
 
         if (vehicleAhead.velocity <= 0) {
             // Vehicle ahead is stopped so following distance = stopping distance
@@ -170,7 +203,7 @@ public class PrototypeVehicle {
                 vSlow = velocity;
             } else {
                 // Vehicle ahead is going faster than this one
-                vSlow = vehicleAhead.velocity + status.get("dv") * (randomNumber - 0.5);
+                vSlow = vehicleAhead.velocity + status.get("dv");// * (randomNumber - 0.5);
             }
             // Following distance is stopping distance + following time * velocity from above
             status.put("sdxc", params.get("CC0") + params.get("CC1") * vSlow);
@@ -292,7 +325,7 @@ public class PrototypeVehicle {
         // Compute the new acceleration
         if (status.get("dx") > status.get("sdxc")) {
             double maxAcceleration;
-            if (report.get("status") == "D") {
+            if (report.get("status").equals("D")) {
                 newAcceleration = params.get("CC7");
             } else {
                 maxAcceleration = params.get("CC8") + params.get("CC9") * Math.min(velocity, maxVelocity) + randomNumber;
@@ -311,14 +344,28 @@ public class PrototypeVehicle {
         return newAcceleration;
     }
 
+
+    public SpatialVector getLocation () {
+        /* Returns the cartesian coordinates of the vehicle
+         */
+        return roadSegment.convertPositionToLocation(position);
+    }
+
+
     public void step (double dt) {
         /* Step the vehicle by one timestep
          */
         // Update velocity
         acceleration = updateAcceleration();
+        if(acceleration<0) {
+            acceleration = Math.min(-velocity / acceleration, dt); // in-case we screech to a halt mid-timestep
+        }
+        position += velocity * dt + 0.5*acceleration*dt*dt;
         velocity += acceleration * dt;
-        velocity = Math.max(velocity, 0);
-        position += velocity * dt;
+        if(position > vehicleAhead.position) {
+            position = vehicleAhead.position;
+            velocity = 0.0;
+        }
         // Switch params at t+1 to t
         report = newReport;
     }

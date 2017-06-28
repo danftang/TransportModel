@@ -1,4 +1,4 @@
-package MicroModel;
+package MicroModel.utilities;
 
 import java.util.Random;
 

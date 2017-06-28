@@ -1,13 +1,14 @@
 package MicroModel.roads;
 
-import MicroModel.SpatialVector;
+import MicroModel.utilities.SpatialVector;
 
 
 public class CornerSegment extends RoadSegment {
+    /* Corner road segment
+     */
 
     public CornerGeometry geo;
-    public RoadSegment incomingSegment;
-    public RoadSegment outgoingSegment;
+
 
     public CornerSegment (SpatialVector segStart, SpatialVector segEnd, SpatialVector cornerLocation,
                           double turningRadius) {
@@ -20,10 +21,13 @@ public class CornerSegment extends RoadSegment {
         this.segLength = geo.totalLength;
 
         // Connecting segments
-        connectionKey.put("incomingSegment", incomingSegment);
-        connectedSegments.add(incomingSegment);
-        connectionKey.put("outgoingSegment", outgoingSegment);
-        connectedSegments.add(outgoingSegment);
+        connectionKey.put("incomingSegment", 0);
+        connectionKey.put("outgoingSegment", 1);
+    }
 
+    public SpatialVector convertPositionToLocation (double distance) {
+        /* Converts position on a road segment into a cartesian coordinate
+         */
+        return geo.convertDistanceToPoint(distance);
     }
 }
