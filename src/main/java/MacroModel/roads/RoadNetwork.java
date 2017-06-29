@@ -1,13 +1,12 @@
 package MacroModel.roads;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class RoadNetwork {
+public class RoadNetwork implements Serializable {
 
     private List<Junction> junctions = new ArrayList<>();
     private List<Road> roads = new ArrayList<>();
-
-    private Random random = new Random();
 
     public List<Junction> getJunctions() {
         return junctions;

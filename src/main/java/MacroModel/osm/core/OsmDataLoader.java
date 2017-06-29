@@ -1,5 +1,6 @@
 package MacroModel.osm.core;
 
+import MacroModel.osm.BoundingBox;
 import MacroModel.roads.Logger;
 import MacroModel.utils.FileUtils;
 import MacroModel.utils.StringUtils;
@@ -27,44 +28,35 @@ public class OsmDataLoader {
         osmEndpoints.add("http://overpass.preprocessors.osm.rambler.ru/cgi/");
     }
 
-    public static Optional<Document> getData(double swLat, double swLon, double neLat, double neLon) {
-        String studyArea = swLat + "," + swLon + "," + neLat + "," + neLon;
-        String studyAreaCacheName = makeStudyAreaCacheName(studyArea);
-        Logger.info("OsmDataLoader: Loading OSM data for bounding box " + swLat + ", " + swLon + " to " + neLat +
-                ", " + neLon + " (cache name " + studyAreaCacheName + ")");
+    public static Optional<Document> getData(BoundingBox boundingBox) {
+        Logger.info("OsmDataLoader: Loading OSM data for bounding box " + boundingBox +
+                " (cache file base name " + boundingBox.getCacheFileBaseName() + ")");
 
-        if (cache.contains(studyAreaCacheName)) {
-            updateCacheIfNecessary(studyAreaCacheName, studyArea);
-        } else {
-            downloadAndCacheData(studyArea);
-        }
+        tryUpdateCacheIfNecessary(boundingBox);
 
-        if (cache.contains(studyAreaCacheName)) {
+        if (cache.contains(boundingBox.getCacheFileBaseName())) {
             Logger.info("OsmDataLoader: Data successfully loaded.");
-            return Optional.of(loadDataFromCache(studyAreaCacheName));
+            return loadDataFromCache(boundingBox.getCacheFileBaseName());
         } else {
             Logger.error("OsmDataLoader: Could not load data from cache or web.");
             return Optional.empty();
         }
     }
 
-    private static String makeStudyAreaCacheName(String studyArea) {
-        return "CF" + Integer.toString(studyArea.hashCode());
-    }
-
-    private static void updateCacheIfNecessary(String studyAreaCacheName, String studyArea) {
-        if (cache.isOutOfDate(studyAreaCacheName)) {
+    private static void tryUpdateCacheIfNecessary(BoundingBox boundingBox) {
+        String cacheFileBaseName = boundingBox.getCacheFileBaseName();
+        if (!cache.contains(cacheFileBaseName) || cache.isOutOfDate(cacheFileBaseName)) {
             Logger.info("OsmDataLoader: Cached OSM data is out of date. Trying to renew.");
-            downloadAndCacheData(studyArea);
+            downloadAndCacheData(boundingBox);
         } else {
             Logger.info("OsmDataLoader: Recently cached OSM data can be loaded for the study area.");
         }
     }
 
-    private static void downloadAndCacheData(String studyArea) {
+    private static void downloadAndCacheData(BoundingBox boundingBox) {
         String data = "";
         for (String osmEndpoint : osmEndpoints) {
-            data = downloadRawDataFromEndpoint(osmEndpoint, studyArea);
+            data = downloadRawDataFromEndpoint(osmEndpoint, boundingBox);
             if (!data.isEmpty()) {
                 break;
             }
@@ -73,14 +65,14 @@ public class OsmDataLoader {
         if (data.isEmpty()) {
             Logger.error("OsmDataLoader: Couldn't download OSM data. Are you connected to the internet?");
         } else {
-            cache.cache(makeStudyAreaCacheName(studyArea), data);
+            cache.cache(boundingBox.getCacheFileBaseName(), data);
             Logger.info("OsmDataLoader: OSM data successfully downloaded and cached");
         }
     }
 
-    private static String downloadRawDataFromEndpoint(String osmEndpoint, String studyArea) {
+    private static String downloadRawDataFromEndpoint(String osmEndpoint, BoundingBox boundingBox) {
         // http://wiki.openstreetmap.org/wiki/Overpass_API/Language_Guide#Recursion_clauses_.28.22recursion_filters.22.29
-        String urlStr = osmEndpoint + "interpreter?data=(node(" + studyArea + ");<;);out%20body;";
+        String urlStr = osmEndpoint + "interpreter?data=(node(" + boundingBox + ");<;);out%20body;";
 
         String rawData = "";
         try {
@@ -99,17 +91,17 @@ public class OsmDataLoader {
         return rawData;
     }
 
-    private static Document loadDataFromCache(String studyAreaCacheName) {
+    private static Optional<Document> loadDataFromCache(String studyAreaCacheName) {
         String filePath = cache.getExistingCachedFilePath(studyAreaCacheName);
 
         try {
-            return FileUtils.readXmlFile(filePath);
+            return Optional.of(FileUtils.readXmlFile(filePath));
         } catch (IOException ex) {
             Logger.error("OsmDataLoader: Could not read cached OSM file: " + ex.getMessage());
         } catch (Exception ex) {
             Logger.error("OsmDataLoader: Could not parse cached OSM file as XML: " + ex.getMessage());
         }
 
-        return null;
+        return Optional.empty();
     }
 }

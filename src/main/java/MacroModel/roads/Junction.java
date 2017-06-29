@@ -1,8 +1,9 @@
 package MacroModel.roads;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Junction {
+public class Junction implements Serializable {
 
     private Coordinates coordinates;
     private Map<Junction, Road> incomingRoads = new HashMap<>();

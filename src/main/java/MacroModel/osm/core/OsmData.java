@@ -1,13 +1,17 @@
 package MacroModel.osm.core;
 
+import MacroModel.osm.BoundingBox;
+import MacroModel.roads.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import MacroModel.roads.Logger;
 
 import java.util.*;
 
 public class OsmData {
+
+    private BoundingBox boundingBox;
+    private boolean isLoaded = false;
 
     private Map<Long, OsmNode> nodes = new HashMap<>();
     private Map<String, Map<String, Set<OsmNode>>> nodesByTag = new HashMap<>();
@@ -17,41 +21,70 @@ public class OsmData {
     private Map<Long, OsmRelation> relations = new HashMap<>();
     private Map<String, Map<String, Set<OsmRelation>>> relationsByTag = new HashMap<>();
 
-    public OsmData(Document osmXmlData) {
-        parseNodes(osmXmlData);
-        parseWays(osmXmlData);
-        parseRelations(osmXmlData);
+    public OsmData(BoundingBox boundingBox) {
+        this.boundingBox = boundingBox;
+    }
 
-        Logger.info("OSMData: Finished indexing " + nodes.size() + " nodes, " + ways.size() + " ways and " +
-                relations.size() + " relations");
+    public BoundingBox getBoundingBox() {
+        return boundingBox;
     }
 
     public Map<Long, OsmNode> getNodes() {
+        loadIfNecessary();
         return nodes;
     }
 
     public Map<String, Map<String, Set<OsmNode>>> getNodesByTag() {
+        loadIfNecessary();
         return nodesByTag;
     }
 
     public Map<Long, OsmWay> getWays() {
+        loadIfNecessary();
         return ways;
     }
 
     public Map<String, Map<String, Set<OsmWay>>> getWaysByTag() {
+        loadIfNecessary();
         return waysByTag;
     }
 
     public Map<OsmNode, Set<OsmWay>> getWaysByContainedNode() {
+        loadIfNecessary();
         return waysByContainedNode;
     }
 
     public Map<Long, OsmRelation> getRelations() {
+        loadIfNecessary();
         return relations;
     }
 
     public Map<String, Map<String, Set<OsmRelation>>> getRelationsByTag() {
+        loadIfNecessary();
         return relationsByTag;
+    }
+
+    private void loadIfNecessary() {
+        if (!isLoaded) {
+            load();
+            isLoaded = true;
+        }
+    }
+
+    private void load() {
+        Optional<Document> osmXmlDataOpt = OsmDataLoader.getData(boundingBox);
+
+        if (osmXmlDataOpt.isPresent()) {
+            Document osmXmlData = osmXmlDataOpt.get();
+            parseNodes(osmXmlData);
+            parseWays(osmXmlData);
+            parseRelations(osmXmlData);
+
+            Logger.info("OSMData: Finished indexing " + nodes.size() + " nodes, " + ways.size() + " ways and " +
+                    relations.size() + " relations");
+        } else {
+            Logger.info("OSMData: Unable to load raw data");
+        }
     }
 
     private void parseNodes(Document osmXmlData) {
@@ -126,13 +159,6 @@ public class OsmData {
             if (node == null) {
                 continue;
             }
-//            if (node == null) {
-//                Logger.error("Way " + wayId + " contains OSM node " + id + ", which does not exist in the data.");
-//            }
-
-//            if (node != null) {
-//                Logger.error("Way " + wayId + " contains OSM node " + id + ", which exists in the data.");
-//            }
             wayNodes.add(node);
         }
 
@@ -235,5 +261,4 @@ public class OsmData {
             }
         }
     }
-
 }

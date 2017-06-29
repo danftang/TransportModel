@@ -1,9 +1,10 @@
 package MacroModel.roads;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-public class Vehicle {
+public class Vehicle implements Serializable {
 
     private String name;
     private List<Junction> route;

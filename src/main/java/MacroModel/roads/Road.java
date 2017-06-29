@@ -1,11 +1,12 @@
 package MacroModel.roads;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Road {
+public class Road implements Serializable {
 
     private Junction start;
     private Junction end;
