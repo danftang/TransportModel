@@ -12,6 +12,7 @@ public class OsmData {
 
     private BoundingBox boundingBox;
     private boolean isLoaded = false;
+    private long cacheTimestamp;
 
     private Map<Long, OsmNode> nodes = new HashMap<>();
     private Map<String, Map<String, Set<OsmNode>>> nodesByTag = new HashMap<>();
@@ -27,6 +28,11 @@ public class OsmData {
 
     public BoundingBox getBoundingBox() {
         return boundingBox;
+    }
+
+    public long getCacheTimestamp() {
+        loadIfNecessary();
+        return cacheTimestamp;
     }
 
     public Map<Long, OsmNode> getNodes() {
@@ -72,18 +78,19 @@ public class OsmData {
     }
 
     private void load() {
-        Optional<Document> osmXmlDataOpt = OsmDataLoader.getData(boundingBox);
+        Optional<OsmXmlData> osmXmlDataOpt = OsmDataLoader.getData(boundingBox);
 
         if (osmXmlDataOpt.isPresent()) {
-            Document osmXmlData = osmXmlDataOpt.get();
-            parseNodes(osmXmlData);
-            parseWays(osmXmlData);
-            parseRelations(osmXmlData);
+            cacheTimestamp = osmXmlDataOpt.get().getTimestamp();
+            Document xml = osmXmlDataOpt.get().getXmlDocument();
+            parseNodes(xml);
+            parseWays(xml);
+            parseRelations(xml);
 
             Logger.info("OSMData: Finished indexing " + nodes.size() + " nodes, " + ways.size() + " ways and " +
                     relations.size() + " relations");
         } else {
-            Logger.info("OSMData: Unable to load raw data");
+            Logger.error("OSMData: Unable to load raw data");
         }
     }
 

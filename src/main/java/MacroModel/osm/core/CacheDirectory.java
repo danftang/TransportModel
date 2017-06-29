@@ -28,13 +28,16 @@ public class CacheDirectory {
         return makeCacheFilePath(name, cachedFiles.get(name));
     }
 
-    public void cache(String cacheFileBaseName, String data) {
-        cache(cacheFileBaseName, data.getBytes());
+    public long getExistingCachedFileTimestamp(String name) {
+        return cachedFiles.get(name);
     }
 
-    public void cache(String cacheFileBaseName, byte[] data) {
+    public void cache(String cacheFileBaseName, long timestamp, String data) {
+        cache(cacheFileBaseName, timestamp, data.getBytes());
+    }
+
+    public void cache(String cacheFileBaseName, long timestamp, byte[] data) {
         deleteIfExists(cacheFileBaseName);
-        long timestamp = new Date().getTime();
         String path = makeCacheFilePath(cacheFileBaseName, timestamp);
 
         try {

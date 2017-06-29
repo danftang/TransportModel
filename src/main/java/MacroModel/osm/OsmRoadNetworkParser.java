@@ -18,7 +18,7 @@ import java.util.*;
 public class OsmRoadNetworkParser {
 
     private static long aWeekMillis = 7 * 24 * 60 * 60 * 1000;
-    private static CacheDirectory cache = new CacheDirectory("cache/roads/", ".xml", aWeekMillis);
+    private static CacheDirectory cache = new CacheDirectory("cache/roads/", ".ser", aWeekMillis);
 
     public static Optional<RoadNetwork> getRoadNetwork(OsmData osmData) {
         BoundingBox boundingBox = osmData.getBoundingBox();
@@ -27,7 +27,7 @@ public class OsmRoadNetworkParser {
         Logger.info("OsmRoadNetworkParser: Getting road network for bounding box " + boundingBox +
                 " (cache base name " + cacheFileBaseName + ")");
 
-        tryUpdateCacheIfNecessary(osmData, cacheFileBaseName);
+        updateCacheIfNecessary(osmData, cacheFileBaseName);
 
         if (cache.contains(cacheFileBaseName)) {
             Logger.info("OsmRoadNetworkParser: Road network successfully loaded.");
@@ -38,13 +38,13 @@ public class OsmRoadNetworkParser {
         }
     }
 
-    private static void tryUpdateCacheIfNecessary(OsmData osmData, String cacheFileBaseName) {
+    private static void updateCacheIfNecessary(OsmData osmData, String cacheFileBaseName) {
         if (!cache.contains(cacheFileBaseName) || cache.isOutOfDate(cacheFileBaseName)) {
-            createAndCacheRoadNetwork(osmData, cacheFileBaseName);
+            tryCreateAndCacheRoadNetwork(osmData, cacheFileBaseName);
         }
     }
 
-    private static void createAndCacheRoadNetwork(OsmData osmData, String cacheFileBaseName) {
+    private static void tryCreateAndCacheRoadNetwork(OsmData osmData, String cacheFileBaseName) {
         Set<OsmWay> osmRoads = getRoads(osmData);
 
         RoadNetwork roadNetwork = new RoadNetwork();
@@ -54,7 +54,8 @@ public class OsmRoadNetworkParser {
         ObjectSerializer<RoadNetwork> serializer = new ObjectSerializer<>();
         byte[] serialized = serializer.serialize(roadNetwork);
 
-        cache.cache(cacheFileBaseName, serialized);
+        long underlyingDataTimestamp = osmData.getCacheTimestamp();
+        cache.cache(cacheFileBaseName, underlyingDataTimestamp, serialized);
     }
 
     private static Set<OsmWay> getRoads(OsmData osmData) {

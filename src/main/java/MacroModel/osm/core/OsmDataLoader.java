@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class OsmDataLoader {
         osmEndpoints.add("http://overpass.preprocessors.osm.rambler.ru/cgi/");
     }
 
-    public static Optional<Document> getData(BoundingBox boundingBox) {
+    static Optional<OsmXmlData> getData(BoundingBox boundingBox) {
         Logger.info("OsmDataLoader: Loading OSM data for bounding box " + boundingBox +
                 " (cache file base name " + boundingBox.getCacheFileBaseName() + ")");
 
@@ -65,13 +66,14 @@ public class OsmDataLoader {
         if (data.isEmpty()) {
             Logger.error("OsmDataLoader: Couldn't download OSM data. Are you connected to the internet?");
         } else {
-            cache.cache(boundingBox.getCacheFileBaseName(), data);
+            long timestamp = new Date().getTime();
+            cache.cache(boundingBox.getCacheFileBaseName(), timestamp, data);
             Logger.info("OsmDataLoader: OSM data successfully downloaded and cached");
         }
     }
 
     private static String downloadRawDataFromEndpoint(String osmEndpoint, BoundingBox boundingBox) {
-        // http://wiki.openstreetmap.org/wiki/Overpass_API/Language_Guide#Recursion_clauses_.28.22recursion_filters.22.29
+        // For information on the query syntax, visit http://wiki.openstreetmap.org/wiki/Overpass_API/Language_Guide
         String urlStr = osmEndpoint + "interpreter?data=(node(" + boundingBox + ");<;);out%20body;";
 
         String rawData = "";
@@ -91,11 +93,14 @@ public class OsmDataLoader {
         return rawData;
     }
 
-    private static Optional<Document> loadDataFromCache(String studyAreaCacheName) {
+    private static Optional<OsmXmlData> loadDataFromCache(String studyAreaCacheName) {
         String filePath = cache.getExistingCachedFilePath(studyAreaCacheName);
+        long timestamp = cache.getExistingCachedFileTimestamp(studyAreaCacheName);
 
         try {
-            return Optional.of(FileUtils.readXmlFile(filePath));
+            Document xml = FileUtils.readXmlFile(filePath);
+            OsmXmlData osmXmlData = new OsmXmlData(xml, timestamp);
+            return Optional.of(osmXmlData);
         } catch (IOException ex) {
             Logger.error("OsmDataLoader: Could not read cached OSM file: " + ex.getMessage());
         } catch (Exception ex) {
