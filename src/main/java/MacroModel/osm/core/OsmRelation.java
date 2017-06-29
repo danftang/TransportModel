@@ -1,4 +1,4 @@
-package MacroModelJon.osm.core;
+package MacroModel.osm.core;
 
 import java.util.Map;
 import java.util.Set;

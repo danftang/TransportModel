@@ -1,8 +1,9 @@
-package MacroModelJon.roads;
+package MacroModel.roads;
 
-import MacroModelJon.osm.OsmRoadNetworkParser;
-import MacroModelJon.osm.core.OsmData;
-import MacroModelJon.osm.core.OsmDataLoader;
+import MacroModel.osm.BoundingBox;
+import MacroModel.osm.OsmRoadNetworkParser;
+import MacroModel.osm.core.OsmData;
+import MacroModel.osm.core.OsmDataLoader;
 import org.w3c.dom.Document;
 
 import java.util.ArrayList;
@@ -50,13 +51,12 @@ public class Simulation {
     }
 
     private void initialize() {
-        Optional<Document> rawData = OsmDataLoader.getData(51.0, 0, 51.1, 0.1);
-        OsmData data = new OsmData(rawData.get());
-        roadNetwork = OsmRoadNetworkParser.makeRoadNetwork(data);
+        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
+        roadNetwork = OsmRoadNetworkParser.getRoadNetwork(data).get();
     }
 
     private void run() {
-        makeRandomVehicles(100000);
+        makeRandomVehicles(1000);
 
         while (timestep <= lastTimestep) {
             roadNetwork.step();

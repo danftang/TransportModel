@@ -1,14 +1,12 @@
-package MacroModelJon.osm.core;
+package MacroModel.osm.core;
 
-import MacroModelJon.roads.Logger;
-import MacroModelJon.utils.FileUtils;
-import MacroModelJon.utils.StringUtils;
+import MacroModel.roads.Logger;
+import MacroModel.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CacheDirectory {
@@ -26,25 +24,21 @@ public class CacheDirectory {
         this.maxCachedFileAgeMillis = maxCachedFileAgeMillis;
     }
 
-    public String loadFromCache(String name) {
-        String filePath = getExistingCachedFilePath(name);
-        try {
-            List<String> lines = FileUtils.readFileLines(filePath);
-            return StringUtils.mkString(lines, "");
-        } catch (IOException ex) {
-            Logger.error("Unable to load cached data from " + filePath);
-            return "";
-        }
-    }
-
     public String getExistingCachedFilePath(String name) {
         return makeCacheFilePath(name, cachedFiles.get(name));
     }
 
-    public void cache(String name, String data) {
-        deleteIfExists(name);
-        long timestamp = new Date().getTime();
-        String path = makeCacheFilePath(name, timestamp);
+    public long getExistingCachedFileTimestamp(String name) {
+        return cachedFiles.get(name);
+    }
+
+    public void cache(String cacheFileBaseName, long timestamp, String data) {
+        cache(cacheFileBaseName, timestamp, data.getBytes());
+    }
+
+    public void cache(String cacheFileBaseName, long timestamp, byte[] data) {
+        deleteIfExists(cacheFileBaseName);
+        String path = makeCacheFilePath(cacheFileBaseName, timestamp);
 
         try {
             FileUtils.writeFile(path, data);
@@ -54,12 +48,12 @@ public class CacheDirectory {
         }
     }
 
-    public boolean contains(String name) {
-        return cachedFiles.containsKey(name);
+    public boolean contains(String cacheFileBaseName) {
+        return cachedFiles.containsKey(cacheFileBaseName);
     }
 
-    public boolean isOutOfDate(String name) {
-        return (cachedFiles.get(name) + maxCachedFileAgeMillis) < new Date().getTime();
+    public boolean isOutOfDate(String cacheFileBaseName) {
+        return (cachedFiles.get(cacheFileBaseName) + maxCachedFileAgeMillis) < new Date().getTime();
     }
 
     private Map<String, Long> getCachedFiles() {
@@ -77,9 +71,9 @@ public class CacheDirectory {
         return cachedFiles;
     }
 
-    private void deleteIfExists(String name) {
-        if (cachedFiles.containsKey(name)) {
-            String path = getExistingCachedFilePath(name);
+    private void deleteIfExists(String cacheFileBaseName) {
+        if (cachedFiles.containsKey(cacheFileBaseName)) {
+            String path = getExistingCachedFilePath(cacheFileBaseName);
             File file = new File(path);
             if (file.exists()) {
                 file.delete();
@@ -87,8 +81,7 @@ public class CacheDirectory {
         }
     }
 
-    private String makeCacheFilePath(String name, long timestamp) {
-        return path + name + "_" + timestamp + fileExtension;
+    private String makeCacheFilePath(String cacheFileBaseName, long timestamp) {
+        return path + cacheFileBaseName + "_" + timestamp + fileExtension;
     }
-
 }

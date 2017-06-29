@@ -1,6 +1,6 @@
-package MacroModelJon.roads;
+package MacroModel.roads;
 
-import MacroModelJon.utils.CoordinateUtils;
+import MacroModel.utils.CoordinateUtils;
 
 import java.util.*;
 
