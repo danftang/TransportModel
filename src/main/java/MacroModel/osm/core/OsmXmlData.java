@@ -1,19 +1,19 @@
 package MacroModel.osm.core;
 
-import org.w3c.dom.Document;
+import javax.xml.stream.XMLEventReader;
 
 public class OsmXmlData {
 
-    private Document xmlDocument;
+    private XMLEventReader reader;
     private long timestamp;
 
-    public OsmXmlData(Document xmlDocument, long timestamp) {
-        this.xmlDocument = xmlDocument;
+    public OsmXmlData(XMLEventReader reader, long timestamp) {
+        this.reader = reader;
         this.timestamp = timestamp;
     }
 
-    public Document getXmlDocument() {
-        return xmlDocument;
+    public XMLEventReader getReader() {
+        return reader;
     }
 
     public long getTimestamp() {

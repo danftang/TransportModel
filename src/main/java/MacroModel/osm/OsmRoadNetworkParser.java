@@ -17,8 +17,8 @@ import java.util.*;
 
 public class OsmRoadNetworkParser {
 
-    private static long aWeekMillis = 7 * 24 * 60 * 60 * 1000;
-    private static CacheDirectory cache = new CacheDirectory("cache/roads/", ".ser", aWeekMillis);
+    private static long cacheValidForMillis = 60 * 24 * 60 * 60 * 1000;
+    private static CacheDirectory cache = new CacheDirectory("cache/roads/", ".ser", cacheValidForMillis);
 
     public static Optional<RoadNetwork> getRoadNetwork(OsmData osmData) {
         BoundingBox boundingBox = osmData.getBoundingBox();

@@ -6,6 +6,9 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +50,10 @@ public class FileUtils {
         Document doc = docBuilder.parse(xmlFile);
         doc.getDocumentElement().normalize();
         return doc;
+    }
+
+    public static XMLEventReader streamXmlFile(String path) throws IOException, XMLStreamException {
+        return XMLInputFactory.newInstance().createXMLEventReader(new FileInputStream(path));
     }
 
     public static String getNameWithoutExtension(File file) {
