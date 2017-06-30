@@ -20,23 +20,35 @@ public class OsmRoadNetworkParser {
     private static long cacheValidForMillis = 60 * 24 * 60 * 60 * 1000;
     private static CacheDirectory cache = new CacheDirectory("cache/roads/", ".ser", cacheValidForMillis);
 
-    public static Optional<RoadNetwork> getRoadNetwork(OsmData osmData) {
-        BoundingBox boundingBox = osmData.getBoundingBox();
-        String cacheFileBaseName = boundingBox.getCacheFileBaseName();
+    public static RoadNetwork getRoadNetwork(OsmData osmData) {
+        Set<OsmWay> osmRoads = getRoads(osmData);
 
-        Logger.info("OsmRoadNetworkParser: Getting road network for bounding box " + boundingBox +
-                " (cache base name " + cacheFileBaseName + ")");
+        RoadNetwork roadNetwork = new RoadNetwork();
+        Map<OsmNode, Junction> junctionsByOsmNode = createJunctions(roadNetwork, osmRoads);
+        createRoads(roadNetwork, osmRoads, junctionsByOsmNode);
 
-        updateCacheIfNecessary(osmData, cacheFileBaseName);
+        Logger.info("OsmRoadNetworkParser: Road network successfully loaded.");
 
-        if (cache.contains(cacheFileBaseName)) {
-            Logger.info("OsmRoadNetworkParser: Road network successfully loaded.");
-            return loadDataFromCache(cacheFileBaseName);
-        } else {
-            Logger.error("OsmRoadNetworkParser: Could not load road network.");
-            return Optional.empty();
-        }
+        return roadNetwork;
     }
+
+//    public static Optional<RoadNetwork> getRoadNetwork(OsmData osmData) {
+//        BoundingBox boundingBox = osmData.getBoundingBox();
+//        String cacheFileBaseName = boundingBox.getCacheFileBaseName();
+//
+//        Logger.info("OsmRoadNetworkParser: Getting road network for bounding box " + boundingBox +
+//                " (cache base name " + cacheFileBaseName + ")");
+//
+//        updateCacheIfNecessary(osmData, cacheFileBaseName);
+//
+//        if (cache.contains(cacheFileBaseName)) {
+//            Logger.info("OsmRoadNetworkParser: Road network successfully loaded.");
+//            return loadDataFromCache(cacheFileBaseName);
+//        } else {
+//            Logger.error("OsmRoadNetworkParser: Could not load road network.");
+//            return Optional.empty();
+//        }
+//    }
 
     private static void updateCacheIfNecessary(OsmData osmData, String cacheFileBaseName) {
         if (!cache.contains(cacheFileBaseName) || cache.isOutOfDate(cacheFileBaseName)) {
@@ -45,14 +57,21 @@ public class OsmRoadNetworkParser {
     }
 
     private static void tryCreateAndCacheRoadNetwork(OsmData osmData, String cacheFileBaseName) {
+        Logger.info("Creating and caching road network");
         Set<OsmWay> osmRoads = getRoads(osmData);
+
+        Logger.info("OSM ways loaded");
 
         RoadNetwork roadNetwork = new RoadNetwork();
         Map<OsmNode, Junction> junctionsByOsmNode = createJunctions(roadNetwork, osmRoads);
         createRoads(roadNetwork, osmRoads, junctionsByOsmNode);
 
+        Logger.info("Road network created");
+
         ObjectSerializer<RoadNetwork> serializer = new ObjectSerializer<>();
         byte[] serialized = serializer.serialize(roadNetwork);
+
+        Logger.info("Road network serialized");
 
         long underlyingDataTimestamp = osmData.getCacheTimestamp();
         cache.cache(cacheFileBaseName, underlyingDataTimestamp, serialized);

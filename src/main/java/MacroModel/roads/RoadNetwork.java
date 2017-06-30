@@ -38,9 +38,26 @@ public class RoadNetwork implements Serializable {
         roads.forEach(Road::report);
     }
 
-    public List<Junction> getJunctionsAccessibleFrom(Junction junction) {
+    public List<Junction> getJunctionsAccessibleFrom(Junction startJunction) {
         List<Junction> accessible = new ArrayList<>();
-        exploreFromJunction(junction, accessible);
+        List<Junction> open = new ArrayList<>();
+        open.add(startJunction);
+
+        while (!open.isEmpty()) {
+            List<Junction> nextOpen = new ArrayList<>();
+            for (Junction junction : open) {
+                for (Map.Entry<Junction, Road> entry : junction.getOutgoingRoads().entrySet()) {
+                    Junction j = entry.getKey();
+                    if (!accessible.contains(j)) {
+                        accessible.add(j);
+                        nextOpen.add(j);
+                    }
+                }
+            }
+
+            open = nextOpen;
+        }
+
         return accessible;
     }
 

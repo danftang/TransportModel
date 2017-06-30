@@ -3,12 +3,10 @@ package MacroModel.roads;
 import MacroModel.osm.BoundingBox;
 import MacroModel.osm.OsmRoadNetworkParser;
 import MacroModel.osm.core.OsmData;
-import MacroModel.osm.core.OsmDataLoader;
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class Simulation {
@@ -25,7 +23,7 @@ public class Simulation {
     public void start() {
         Logger.initialize(this);
         initialize();
-        //run();
+        run();
     }
 
     private void initializeTest() {
@@ -51,8 +49,8 @@ public class Simulation {
     }
 
     private void initialize() {
-        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
-//        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
+//        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
+        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
         roadNetwork = OsmRoadNetworkParser.getRoadNetwork(data).get();
     }
 
@@ -75,14 +73,23 @@ public class Simulation {
                 Vehicle vehicle = new Vehicle(route, "v" + i);
                 route.get(0).take(vehicle);
             }
+
+            Logger.info((i + 1) + " vehicles created");
         }
+
+        Logger.info("Finished creating " + number + " vehicles");
     }
 
     private static List<Junction> getRandomRoute(RoadNetwork roadNetwork) {
         Junction start = roadNetwork.getJunctions().get(rand.nextInt(roadNetwork.getJunctions().size()));
-        List<Junction> accessibleJunctions = roadNetwork.getJunctionsAccessibleFrom(start);
-        Junction end = accessibleJunctions.get(rand.nextInt(accessibleJunctions.size()));
-        return new RouteSearch().findRoute(start, end).getRouteSteps();
+        Junction end = roadNetwork.getJunctions().get(rand.nextInt(roadNetwork.getJunctions().size()));
+        List<Junction> routeSteps = new RouteSearch().findRoute(start, end).getRouteSteps();
+
+        if (routeSteps.isEmpty()) {
+            return getRandomRoute(roadNetwork);
+        } else {
+            return routeSteps;
+        }
     }
 
     public static void main(String[] args) {
