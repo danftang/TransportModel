@@ -1,6 +1,8 @@
 package MacroModel.osm.core;
 
+import MacroModel.osm.BoundingBox;
 import MacroModel.roads.Logger;
+import org.graphstream.ui.layout.springbox.implementations.SpringBoxNodeParticle;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -10,6 +12,10 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 
 public class OsmData {
+
+    private BoundingBox boundingBox;
+    private boolean isLoaded = false;
+    private long cacheTimestamp;
 
     private Map<Long, OsmNode> nodes = new HashMap<>();
     private Map<String, Map<String, Set<OsmNode>>> nodesByTag = new HashMap<>();
@@ -21,40 +27,69 @@ public class OsmData {
 
     private Map<OsmRelation, List<XMLEvent>> relationRawContents = new HashMap<>();
 
-    public OsmData(XMLEventReader xmlReader) {
-        parseXml(xmlReader);
-        processMembersForAllRelations();
+    public OsmData(BoundingBox boundingBox) {
+        this.boundingBox = boundingBox;
+    }
 
-        Logger.info("OSMData: Finished parsing and indexing " + nodes.size() + " nodes, " + ways.size() +
-                " ways and " + relations.size() + " relations");
+    public long getCacheTimestamp() {
+        loadIfNecessary();
+        return cacheTimestamp;
     }
 
     public Map<Long, OsmNode> getNodes() {
+        loadIfNecessary();
         return nodes;
     }
 
     public Map<String, Map<String, Set<OsmNode>>> getNodesByTag() {
+        loadIfNecessary();
         return nodesByTag;
     }
 
     public Map<Long, OsmWay> getWays() {
+        loadIfNecessary();
         return ways;
     }
 
     public Map<String, Map<String, Set<OsmWay>>> getWaysByTag() {
+        loadIfNecessary();
         return waysByTag;
     }
 
     public Map<OsmNode, Set<OsmWay>> getWaysByContainedNode() {
+        loadIfNecessary();
         return waysByContainedNode;
     }
 
     public Map<Long, OsmRelation> getRelations() {
+        loadIfNecessary();
         return relations;
     }
 
     public Map<String, Map<String, Set<OsmRelation>>> getRelationsByTag() {
+        loadIfNecessary();
         return relationsByTag;
+    }
+
+    private void loadIfNecessary() {
+        if (!isLoaded) {
+            load();
+        }
+    }
+
+    private void load() {
+        Optional<OsmCachedXmlData> dataOpt = OsmDataLoader.getData(boundingBox);
+
+        if (dataOpt.isPresent()) {
+            OsmCachedXmlData data = dataOpt.get();
+            parseXml(data.getXmlReader());
+            processMembersForAllRelations();
+            cacheTimestamp = data.getTimestamp();
+            Logger.info("OSMData: Finished parsing and indexing " + nodes.size() + " nodes, " + ways.size() +
+                    " ways and " + relations.size() + " relations.");
+        } else {
+            Logger.info("OSMData: Loading failed. Cannot access raw XML data.");
+        }
     }
 
     private void parseXml(XMLEventReader xmlReader) {

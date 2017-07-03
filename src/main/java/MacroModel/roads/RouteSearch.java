@@ -11,7 +11,7 @@ public class RouteSearch {
 
     public Route findRoute(Junction origin, Junction destination) {
         if (origin.equals(destination)) {
-            return new Route(origin, destination, new ArrayList<>(), 0);
+            return new Route(origin, destination, new ArrayList<>(), origin, 0);
         }
 
         initialize(origin, destination);
@@ -23,14 +23,14 @@ public class RouteSearch {
         if (bestRoutesToJunctions.containsKey(destination)) {
             return bestRoutesToJunctions.get(destination);
         } else {
-            return new Route(origin, destination, new ArrayList<>(), 0);
+            return new Route(origin, destination, new ArrayList<>(), origin, 0);
         }
     }
 
     private void initialize(Junction origin, Junction destination) {
         List<Junction> routeSteps = new ArrayList<>();
         routeSteps.add(origin);
-        Route route = new Route(origin, destination, routeSteps, 0);
+        Route route = new Route(origin, destination, routeSteps, origin, 0);
 
         double estimatedCost = estimateTotalCost(route, destination);
         routes.put(estimatedCost, new ArrayList<>());
@@ -40,7 +40,7 @@ public class RouteSearch {
 
     private double estimateTotalCost(Route route, Junction destination) {
         double costSoFar = route.getCost();
-        double estimatedCostToDestination = distBetweenJunctions(route.lastJunction(), destination);
+        double estimatedCostToDestination = distBetweenJunctions(route.getLastStep(), destination);
         return costSoFar + estimatedCostToDestination;
     }
 
@@ -61,7 +61,7 @@ public class RouteSearch {
     }
 
     private void advanceRoute(Route route, Junction destination) {
-        Junction activeJunction = route.lastJunction();
+        Junction activeJunction = route.getLastStep();
         for (Map.Entry<Junction, Road> outgoingRoad : activeJunction.getOutgoingRoads().entrySet()) {
             Junction nextJunction = outgoingRoad.getKey();
             Road roadToJunction = outgoingRoad.getValue();
@@ -86,12 +86,14 @@ public class RouteSearch {
         private Junction origin;
         private Junction destination;
         private List<Junction> routeSteps;
+        private Junction lastStep;
         private double cost;
 
-        public Route(Junction origin, Junction destination, List<Junction> routeSteps, double cost) {
+        public Route(Junction origin, Junction destination, List<Junction> routeSteps, Junction lastStep, double cost) {
             this.origin = origin;
             this.destination = destination;
             this.routeSteps = routeSteps;
+            this.lastStep = lastStep;
             this.cost = cost;
         }
 
@@ -111,8 +113,8 @@ public class RouteSearch {
             return cost;
         }
 
-        public Junction lastJunction() {
-            return routeSteps.get(routeSteps.size() - 1);
+        public Junction getLastStep() {
+            return lastStep;
         }
 
         public Route copyAndExtendRoute(Junction junction, double extraCost) {
@@ -120,7 +122,7 @@ public class RouteSearch {
             shallowCopy.addAll(routeSteps);
             shallowCopy.add(junction);
             double newCost = cost + extraCost;
-            Route extendedRoute = new Route(origin, destination, shallowCopy, newCost);
+            Route extendedRoute = new Route(origin, destination, shallowCopy, junction, newCost);
             return extendedRoute;
         }
     }

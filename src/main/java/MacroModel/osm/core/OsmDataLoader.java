@@ -27,7 +27,7 @@ public class OsmDataLoader {
         osmEndpoints.add("http://overpass.preprocessors.osm.rambler.ru/cgi/");
     }
 
-    public static Optional<OsmData> getData(BoundingBox boundingBox) {
+    public static Optional<OsmCachedXmlData> getData(BoundingBox boundingBox) {
         Logger.info("OsmDataLoader: Loading OSM data for bounding box " + boundingBox +
                 " (cache file base name " + boundingBox.getCacheFileBaseName() + ")");
 
@@ -91,14 +91,13 @@ public class OsmDataLoader {
         return false;
     }
 
-    private static Optional<OsmData> loadDataFromCache(String cacheFileBaseName) {
+    private static Optional<OsmCachedXmlData> loadDataFromCache(String cacheFileBaseName) {
         String filePath = cache.getExistingCachedFilePath(cacheFileBaseName);
+        long timestamp = cache.getExistingCachedFileTimestamp(cacheFileBaseName);
 
         try {
             XMLEventReader xmlReader = FileUtils.streamXmlFile(filePath);
-            OsmData osmData = new OsmData(xmlReader);
-            Logger.info("OsmDataLoader: OSM data loaded");
-            return Optional.of(osmData);
+            return Optional.of(new OsmCachedXmlData(xmlReader, timestamp));
         } catch (IOException ex) {
             Logger.error("OsmDataLoader: Could not read cached OSM file: " + ex.getMessage());
         } catch (Exception ex) {

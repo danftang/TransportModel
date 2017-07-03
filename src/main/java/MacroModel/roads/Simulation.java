@@ -24,7 +24,7 @@ public class Simulation {
     public void start() {
         Logger.initialize(this);
         initialize();
-//        run();
+        run();
     }
 
     private void initializeTest() {
@@ -51,7 +51,7 @@ public class Simulation {
 
     private void initialize() {
 //        OsmData data = OsmDataLoader.getData(new BoundingBox(51.0, 0, 51.1, 0.1)).get();
-        OsmData data = OsmDataLoader.getData(new BoundingBox(51.32, -0.53, 51.67, 0.23)).get();
+        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
 //        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
 //        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
         roadNetwork = OsmRoadNetworkParser.getRoadNetwork(data);
