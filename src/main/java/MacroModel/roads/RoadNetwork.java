@@ -1,9 +1,10 @@
 package MacroModel.roads;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-public class RoadNetwork implements Serializable {
+public class RoadNetwork {
 
     private List<Junction> junctions = new ArrayList<>();
     private List<Road> roads = new ArrayList<>();
@@ -16,8 +17,8 @@ public class RoadNetwork implements Serializable {
         return roads;
     }
 
-    public Junction createJunction(Coordinates coordinates, String name) {
-        Junction junction = new Junction(coordinates, name);
+    public Junction createJunction(int id, Coordinates coordinates, String name) {
+        Junction junction = new Junction(id, coordinates, name);
         junctions.add(junction);
         return junction;
     }
@@ -59,14 +60,5 @@ public class RoadNetwork implements Serializable {
         }
 
         return accessible;
-    }
-
-    private void exploreFromJunction(Junction junction, List<Junction> accessible) {
-        if (!accessible.contains(junction)) {
-            accessible.add(junction);
-            junction.getOutgoingRoads().forEach(
-                    (Junction j, Road r) -> exploreFromJunction(j, accessible)
-            );
-        }
     }
 }

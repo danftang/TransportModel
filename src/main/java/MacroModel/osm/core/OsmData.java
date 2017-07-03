@@ -1,9 +1,6 @@
 package MacroModel.osm.core;
 
-import MacroModel.osm.BoundingBox;
 import MacroModel.roads.Logger;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -13,10 +10,6 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 
 public class OsmData {
-
-    private BoundingBox boundingBox;
-    private boolean isLoaded = false;
-    private long cacheTimestamp;
 
     private Map<Long, OsmNode> nodes = new HashMap<>();
     private Map<String, Map<String, Set<OsmNode>>> nodesByTag = new HashMap<>();
@@ -28,99 +21,65 @@ public class OsmData {
 
     private Map<OsmRelation, List<XMLEvent>> relationRawContents = new HashMap<>();
 
-    public OsmData(BoundingBox boundingBox) {
-        this.boundingBox = boundingBox;
-    }
+    public OsmData(XMLEventReader xmlReader) {
+        parseXml(xmlReader);
+        processMembersForAllRelations();
 
-    public BoundingBox getBoundingBox() {
-        return boundingBox;
-    }
-
-    public long getCacheTimestamp() {
-        loadIfNecessary();
-        return cacheTimestamp;
+        Logger.info("OSMData: Finished parsing and indexing " + nodes.size() + " nodes, " + ways.size() +
+                " ways and " + relations.size() + " relations");
     }
 
     public Map<Long, OsmNode> getNodes() {
-        loadIfNecessary();
         return nodes;
     }
 
     public Map<String, Map<String, Set<OsmNode>>> getNodesByTag() {
-        loadIfNecessary();
         return nodesByTag;
     }
 
     public Map<Long, OsmWay> getWays() {
-        loadIfNecessary();
         return ways;
     }
 
     public Map<String, Map<String, Set<OsmWay>>> getWaysByTag() {
-        loadIfNecessary();
         return waysByTag;
     }
 
     public Map<OsmNode, Set<OsmWay>> getWaysByContainedNode() {
-        loadIfNecessary();
         return waysByContainedNode;
     }
 
     public Map<Long, OsmRelation> getRelations() {
-        loadIfNecessary();
         return relations;
     }
 
     public Map<String, Map<String, Set<OsmRelation>>> getRelationsByTag() {
-        loadIfNecessary();
         return relationsByTag;
     }
 
-    private void loadIfNecessary() {
-        if (!isLoaded) {
-            load();
-            isLoaded = true;
-        }
-    }
-
-    private void load() {
-        Optional<OsmXmlData> osmXmlDataOpt = OsmDataLoader.getData(boundingBox);
-
-        if (osmXmlDataOpt.isPresent()) {
-            cacheTimestamp = osmXmlDataOpt.get().getTimestamp();
-            XMLEventReader xmlReader = osmXmlDataOpt.get().getReader();
-
-            while (xmlReader.hasNext()) {
-                try {
-                    XMLEvent xmlEvent = xmlReader.nextEvent();
-                    if (xmlEvent.isStartElement()) {
-                        StartElement startElement = xmlEvent.asStartElement();
-                        switch (startElement.getName().getLocalPart()) {
-                            case "node":
-                                parseNode(startElement, xmlReader);
-                                break;
-                            case "way":
-                                parseWay(startElement, xmlReader);
-                                break;
-                            case "relation":
-                                parseRelation(startElement, xmlReader);
-                                break;
-                            default:
-                                break;
-                        }
+    private void parseXml(XMLEventReader xmlReader) {
+        while (xmlReader.hasNext()) {
+            try {
+                XMLEvent xmlEvent = xmlReader.nextEvent();
+                if (xmlEvent.isStartElement()) {
+                    StartElement startElement = xmlEvent.asStartElement();
+                    switch (startElement.getName().getLocalPart()) {
+                        case "node":
+                            parseNode(startElement, xmlReader);
+                            break;
+                        case "way":
+                            parseWay(startElement, xmlReader);
+                            break;
+                        case "relation":
+                            parseRelation(startElement, xmlReader);
+                            break;
+                        default:
+                            break;
                     }
-                } catch (XMLStreamException ex) {
-                    ex.printStackTrace();
                 }
-
+            } catch (XMLStreamException ex) {
+                ex.printStackTrace();
             }
-
-            processMembersForAllRelations();
-
-            Logger.info("OSMData: Finished indexing " + nodes.size() + " nodes, " + ways.size() + " ways and " +
-                    relations.size() + " relations");
-        } else {
-            Logger.error("OSMData: Unable to load raw data");
         }
     }
 

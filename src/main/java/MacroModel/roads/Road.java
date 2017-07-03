@@ -1,33 +1,44 @@
 package MacroModel.roads;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Road implements Serializable {
+public class Road {
 
     private Junction start;
     private Junction end;
     private double length;
+    private String name;
 
     private Map<Vehicle, Long> travellingAlongRoad = new HashMap<>();
     private List<Vehicle> waitingToExitingRoad = new ArrayList<>();
 
-    private String name;
 
     public Road(Junction start, Junction end, double length, String name) {
         this.start = start;
         this.end = end;
         this.length = length;
+        this.name = name;
         start.addOutgoingRoad(end, this);
         end.addIncomingRoad(start, this);
-        this.name = name;
+    }
+
+    public Junction getStart() {
+        return start;
+    }
+
+    public Junction getEnd() {
+        return end;
     }
 
     public double getLength() {
         return length;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void take(Vehicle vehicle) {
