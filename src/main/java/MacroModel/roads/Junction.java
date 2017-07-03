@@ -1,29 +1,37 @@
 package MacroModel.roads;
 
-import java.io.Serializable;
 import java.util.*;
 
-public class Junction implements Serializable {
+public class Junction {
 
+    private int id;
     private Coordinates coordinates;
+    private String name;
     private Map<Junction, Road> incomingRoads = new HashMap<>();
     private Map<Junction, Road> outgoingRoads = new HashMap<>();
     private Map<Junction, Map<Vehicle, Long>> vehiclesByExit = new HashMap<>();
-
-    private String name;
 
     private int timestepsToTraverseJunction = 1;
     private int vehiclesAcceptedPerIncomingPerTimestep = 1;
 
     private List<Vehicle> vehiclesToRemove = new ArrayList<>();
 
-    public Junction(Coordinates coordinates, String name) {
+    public Junction(int id, Coordinates coordinates, String name) {
+        this.id = id;
         this.coordinates = coordinates;
         this.name = name;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public Coordinates getCoordinates() {
         return coordinates;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Map<Junction, Road> getOutgoingRoads() {

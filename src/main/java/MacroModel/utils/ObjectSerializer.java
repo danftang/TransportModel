@@ -7,7 +7,7 @@ import java.util.zip.InflaterInputStream;
 
 public class ObjectSerializer<T> {
 
-    private Deflater def = new Deflater(Deflater.BEST_COMPRESSION);
+    private Deflater def = new Deflater(Deflater.BEST_SPEED);
 
     public void serializeToFile(T obj, String filePath) {
         try {

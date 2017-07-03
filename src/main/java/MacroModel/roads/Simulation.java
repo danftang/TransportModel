@@ -4,11 +4,10 @@ import MacroModel.osm.BoundingBox;
 import MacroModel.osm.OsmRoadNetworkParser;
 import MacroModel.osm.core.OsmData;
 import MacroModel.osm.core.OsmDataLoader;
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class Simulation {
@@ -29,10 +28,10 @@ public class Simulation {
     }
 
     private void initializeTest() {
-        Junction a = roadNetwork.createJunction(new Coordinates(0, 0), "A");
-        Junction b = roadNetwork.createJunction(new Coordinates(0, 10), "B");
-        Junction c = roadNetwork.createJunction(new Coordinates(10, 10), "C");
-        Junction d = roadNetwork.createJunction(new Coordinates(10, 0), "D");
+        Junction a = roadNetwork.createJunction(1, new Coordinates(0, 0), "A");
+        Junction b = roadNetwork.createJunction(2, new Coordinates(0, 10), "B");
+        Junction c = roadNetwork.createJunction(3, new Coordinates(10, 10), "C");
+        Junction d = roadNetwork.createJunction(4, new Coordinates(10, 0), "D");
 
         roadNetwork.createRoad(a, b, 10, "AB");
         roadNetwork.createRoad(b, a, 10, "BA");
@@ -51,8 +50,11 @@ public class Simulation {
     }
 
     private void initialize() {
-        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
-        roadNetwork = OsmRoadNetworkParser.getRoadNetwork(data).get();
+//        OsmData data = OsmDataLoader.getData(new BoundingBox(51.0, 0, 51.1, 0.1)).get();
+        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
+//        OsmData data = new OsmData(new BoundingBox(51.0, 0, 51.1, 0.1));
+//        OsmData data = new OsmData(new BoundingBox(51.32, -0.53, 51.67, 0.23));
+        roadNetwork = OsmRoadNetworkParser.getRoadNetwork(data);
     }
 
     private void run() {
@@ -74,14 +76,23 @@ public class Simulation {
                 Vehicle vehicle = new Vehicle(route, "v" + i);
                 route.get(0).take(vehicle);
             }
+
+            Logger.info((i + 1) + " vehicles created");
         }
+
+        Logger.info("Finished creating " + number + " vehicles");
     }
 
     private static List<Junction> getRandomRoute(RoadNetwork roadNetwork) {
         Junction start = roadNetwork.getJunctions().get(rand.nextInt(roadNetwork.getJunctions().size()));
-        List<Junction> accessibleJunctions = roadNetwork.getJunctionsAccessibleFrom(start);
-        Junction end = accessibleJunctions.get(rand.nextInt(accessibleJunctions.size()));
-        return new RouteSearch().findRoute(start, end).getRouteSteps();
+        Junction end = roadNetwork.getJunctions().get(rand.nextInt(roadNetwork.getJunctions().size()));
+        List<Junction> routeSteps = new RouteSearch().findRoute(start, end).getRouteSteps();
+
+        if (routeSteps.isEmpty()) {
+            return getRandomRoute(roadNetwork);
+        } else {
+            return routeSteps;
+        }
     }
 
     public static void main(String[] args) {

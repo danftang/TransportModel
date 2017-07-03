@@ -24,6 +24,14 @@ public class CacheDirectory {
         this.maxCachedFileAgeMillis = maxCachedFileAgeMillis;
     }
 
+    public void refresh() {
+        this.cachedFiles = getCachedFiles();
+    }
+
+    public String makeCacheFilePath(String cacheFileBaseName, long timestamp) {
+        return path + cacheFileBaseName + "_" + timestamp + fileExtension;
+    }
+
     public String getExistingCachedFilePath(String name) {
         return makeCacheFilePath(name, cachedFiles.get(name));
     }
@@ -79,9 +87,5 @@ public class CacheDirectory {
                 file.delete();
             }
         }
-    }
-
-    private String makeCacheFilePath(String cacheFileBaseName, long timestamp) {
-        return path + cacheFileBaseName + "_" + timestamp + fileExtension;
     }
 }

@@ -1,9 +1,10 @@
 package MacroModel.roads;
 
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-public class RoadNetwork implements Serializable {
+public class RoadNetwork {
 
     private List<Junction> junctions = new ArrayList<>();
     private List<Road> roads = new ArrayList<>();
@@ -16,8 +17,8 @@ public class RoadNetwork implements Serializable {
         return roads;
     }
 
-    public Junction createJunction(Coordinates coordinates, String name) {
-        Junction junction = new Junction(coordinates, name);
+    public Junction createJunction(int id, Coordinates coordinates, String name) {
+        Junction junction = new Junction(id, coordinates, name);
         junctions.add(junction);
         return junction;
     }
@@ -38,18 +39,26 @@ public class RoadNetwork implements Serializable {
         roads.forEach(Road::report);
     }
 
-    public List<Junction> getJunctionsAccessibleFrom(Junction junction) {
+    public List<Junction> getJunctionsAccessibleFrom(Junction startJunction) {
         List<Junction> accessible = new ArrayList<>();
-        exploreFromJunction(junction, accessible);
-        return accessible;
-    }
+        List<Junction> open = new ArrayList<>();
+        open.add(startJunction);
 
-    private void exploreFromJunction(Junction junction, List<Junction> accessible) {
-        if (!accessible.contains(junction)) {
-            accessible.add(junction);
-            junction.getOutgoingRoads().forEach(
-                    (Junction j, Road r) -> exploreFromJunction(j, accessible)
-            );
+        while (!open.isEmpty()) {
+            List<Junction> nextOpen = new ArrayList<>();
+            for (Junction junction : open) {
+                for (Map.Entry<Junction, Road> entry : junction.getOutgoingRoads().entrySet()) {
+                    Junction j = entry.getKey();
+                    if (!accessible.contains(j)) {
+                        accessible.add(j);
+                        nextOpen.add(j);
+                    }
+                }
+            }
+
+            open = nextOpen;
         }
+
+        return accessible;
     }
 }

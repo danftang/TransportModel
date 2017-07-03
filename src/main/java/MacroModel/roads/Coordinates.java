@@ -1,8 +1,6 @@
 package MacroModel.roads;
 
-import java.io.Serializable;
-
-public class Coordinates implements Serializable {
+public class Coordinates {
 
     private double lat;
     private double lon;
